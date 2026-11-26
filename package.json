@@ -1,0 +1,28 @@
+{
+  "name": "pangu",
+  "version": "1.0.0",
+  "description": "Pangu · 盘古 —— 通用 AI agent 内核: 64 卦 / 384 爻 / 阴阳五行 / 八将灵调度 / 自进化闭环",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/feng/pangu.git"
+  },
+  "keywords": [
+    "pangu",
+    "ai-agent",
+    "yijing",
+    "hexagram",
+    "mcp",
+    "self-evolving"
+  ],
+  "scripts": {
+    "start": "pnpm --filter @pangu/core start",
+    "dev": "pnpm --filter @pangu/core dev",
+    "selftest": "cd apps/core && node tests/tools_selftest.js",
+    "test": "cd apps/core && npm run test:chain",
+    "publish:oss": "node scripts/publish-open-source.js"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

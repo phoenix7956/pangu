@@ -1,0 +1,101 @@
+{
+  "_meta": {
+    "version": "2026.10.18-pinyin",
+    "purpose": "8 子 Agent Cluster 定义 (§0.7 + W6-6 抄 Claude Code TaskTool)",
+    "phase": "W7-stub: 定义完整, 实现在 W7"
+  },
+  "cluster": [
+    {
+      "role": "kun",
+      "name": "坤·kun",
+      "tools": [
+        "exec_command",
+        "write_file",
+        "file_edit",
+        "computer_use_click",
+        "screenshot",
+        "run_installer"
+      ],
+      "system_prompt_suffix": "你是执行型 agent, 不分析不思考, 直接做。"
+    },
+    {
+      "role": "li",
+      "name": "离·li",
+      "tools": [
+        "memory_search",
+        "web_search",
+        "situation_check",
+        "risk_assessment"
+      ],
+      "system_prompt_suffix": "你是分析型 agent, 不执行不写盘, 只推理。"
+    },
+    {
+      "role": "dui",
+      "name": "兑·dui",
+      "tools": [
+        "read_file",
+        "network_check",
+        "http_check",
+        "permission_check",
+        "stock_quote"
+      ],
+      "system_prompt_suffix": "你是验证型 agent, 不改不修, 只读 + 测。"
+    },
+    {
+      "role": "xun",
+      "name": "巽·xun",
+      "tools": [
+        "read_file",
+        "file_grep",
+        "file_find",
+        "search_files",
+        "system_info"
+      ],
+      "system_prompt_suffix": "你是找 bug 的 agent, 不修, 只标。"
+    },
+    {
+      "role": "kan",
+      "name": "坎·kan",
+      "tools": [
+        "direction_decision",
+        "first_step",
+        "critical_point_analysis"
+      ],
+      "system_prompt_suffix": "你是拆任务型 agent, 只规划不执行。"
+    },
+    {
+      "role": "zhen",
+      "name": "震·zhen",
+      "tools": [
+        "memory_read",
+        "caution_signal",
+        "withdrawal_plan",
+        "graceful_exit"
+      ],
+      "system_prompt_suffix": "你是复盘型 agent, 评改学, 不再操作。"
+    },
+    {
+      "role": "qian",
+      "name": "乾·qian",
+      "tools": [
+        "team_dispatch",
+        "resource_pool",
+        "task_done"
+      ],
+      "system_prompt_suffix": "你是派活型 agent, 派合调, 终结。"
+    },
+    {
+      "role": "gen",
+      "name": "艮·gen",
+      "tools": [
+        "memory_write",
+        "cache_put",
+        "cache_get"
+      ],
+      "system_prompt_suffix": "你是学习型 agent, 学忆优。"
+    }
+  ],
+  "dispatch_logic": "主任务 → keyword match → 选 role → spawn 子 agent → 子 agent 拿子工具集 → 跑完返 summary → 主 agent 合并",
+  "w7_estimate": "1 周+, 包含 dispatcher 真实现 + 8 role 子 agent runner",
+  "_comment": "本文件当前无人读取 (2026-10-18 全仓确认)。它曾是第 6 份将灵身份表 —— 键整批改成拼音, 就是为了它哪天被人接上时不会又变成第 7 份对不上的表。真源 = agents/gua-identity.js。"
+}

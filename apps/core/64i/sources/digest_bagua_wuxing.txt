@@ -1,0 +1,24 @@
+# ===== PROVENANCE SLICE =====
+# source_id: digest_bagua_wuxing
+# tier: digest
+# origin: <course-source>/<course-file>
+# lines: 242-254
+# sliced_at: 2026-10-22
+# extractor: apps/core/scripts/extract_provenance_sources.js
+# note: 八卦五行对照表(卦/五行/阴阳/方向/季节) —— 8 卦公理层的五行+方位+季节出处。
+# 规则: 正文为原文件 242-254 行的**逐字拷贝**, 一字未改。
+#      头部为抽取器生成, 与原文无关。
+# ===== /PROVENANCE SLICE =====
+## 9. 八宫八卦五行对照(应用)
+
+| 卦 | 五行 | 阴阳 | 方向 | 季节 |
+|---|---|---|---|---|
+| 乾 | 金 | 阳 | 西北 | 秋冬之交 |
+| 坤 | 土 | 阴 | 西南 | 夏秋之交 |
+| 震 | 木 | 阳 | 东 | 春 |
+| 巽 | 木 | 阴 | 东南 | 春夏之交 |
+| 坎 | 水 | 阳 | 北 | 冬 |
+| 离 | 火 | 阴 | 南 | 夏 |
+| 艮 | 土 | 阳 | 东北 | 冬春之交 |
+| 兑 | 金 | 阴 | 西 | 秋 |
+

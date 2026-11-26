@@ -1,0 +1,327 @@
+/* 六十四卦页 —— 第 168 批: 卦盘 + 读卦, 双栏重做 (2026-10-30)
+ *
+ * 这一页原来最丑: 64 格**每格一根又粗又白的爻柱** + 一颗灰药丸。
+ * 64 × 6 = 384 根白杠糊成一片, 卦名反而被压成配角 ⇒ 满屏「卡片墙」,
+ * 一眼望过去只有噪声, 没有主次。
+ *
+ * 第 168 批把这一页从「卡片墙」改成**一张卦盘 + 一栏读卦**:
+ *
+ *   ① 卦盘: 8×8 的格子退成**发丝线方图** —— 格子本身没有底色、没有边框,
+ *      只有格与格之间一根发丝线。每格左边是一道**刻痕** (爻柱画细到 1.5px、
+ *      压到 45% 透明 —— 是纹理, 不是主角), 右边两行字:
+ *      卦名 (宋体 18) / 卦序 + 五行 (12)。
+ *      64 格全部**左沿对齐** ⇒ 卦名成列、卦序成列、五行成列。
+ *   ② 五行不再是一颗灰药丸: 左边一根 3px 原色竖条 + 灰字。
+ *      (原色一个字节没改, 只降级成「记号」; 五行仍是字色, 不是铺色块。)
+ *   ③ 读卦面板**常驻右侧** (不再是盖住卦盘的浮层): 大卦名 + 大爻柱 +
+ *      卦辞 + 象辞 + 爻辞表。点哪一卦, 右边就换哪一卦 —— 卦盘一屏不被遮。
+ *   ④ 格子压到 68px 高 ⇒ **一屏放下完整六十四卦**, 不用滚。
+ *
+ * 纪律: 爻柱画法仍是设计系统的 .pg-yao (这里只改它四个尺寸变量);
+ *       字号只走四档阶梯; 五行色一字不改; 颜色只走 token。
+ */
+
+/* ── 工作区: 左卦盘 / 右读卦 ───────────────────────────────────── */
+.pg-hex-search { width: 240px; flex: none; }
+/* 五行筛选项: 字色 = 五行墨色 (样稿 2.0 的 .seg .fx)。选中态的底色仍是
+   分段控件自己的, 字色保持五行色 —— 一眼看出「现在筛的是哪一行」。 */
+.pg-hex-fx { font-weight: 600; }
+.pg-hex-fx-金 { color: var(--metal-ink); }
+.pg-hex-fx-木 { color: var(--wood-ink); }
+.pg-hex-fx-水 { color: var(--water-ink); }
+.pg-hex-fx-火 { color: var(--fire-ink); }
+.pg-hex-fx-土 { color: var(--earth-ink); }
+/* 卦盘右上角的「多少 / 多少」: 纯计数, 不是按钮 —— 不给底色不给边框,
+   只用 meta 档字号 + 弱化字色, 免得跟筛选控件抢注意力。 */
+.pg-hex-count {
+  font-family: var(--font-ui);
+  font-size: var(--fs-meta);
+  font-weight: 400;
+  letter-spacing: var(--ls-normal);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.pg-hex-work {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-5);
+}
+.pg-hex-board { flex: 1 1 auto; min-width: 0; }
+.pg-hex-read {
+  flex: 0 0 380px;
+  width: 380px;
+  /* 读卦面板跟着滚动停住 —— 选哪一卦都在眼前, 不用来回找。 */
+  position: sticky;
+  top: 0;
+  max-height: calc(100vh - 128px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* ── 卦盘: 8×8 发丝线方图 ───────────────────────────────────────── */
+/* 卦盘 (样稿 2.0): 8×8 竖排小格 —— 格与格之间留空 (gap), 不再用发丝线方图;
+   每格: 卦画在上 (染卦宫五行) / 卦名居中 / 卦序 + 五行一行。 */
+.pg-hex-grid {
+  display: grid;
+  /* 2026-11-18 老板拍: 还是每行 8 个 (64 卦 8×8 一屏放完的原始口径)。
+     189 批改成 6 列被否 —— 块要拉宽靠**块高** (190 批 min-height 84),
+     不靠减列数 (减列会让卦盘变长、行数变多, 反而一屏放不下)。 */
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: var(--sp-1);
+}
+.pg-hex-cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: var(--sp-2) 2px;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  text-align: center;
+  transition: background-color var(--dur-fast) var(--ease);
+}
+/* 2026-11-18 老板拍: 卦放左边, 序号+五行放右边上下堆叠 —— 横排两栏。
+   左 .pg-hex-g (卦画+卦名), 右 .pg-hex-m (序号在上 五行在下, 纵排)。 */
+.pg-hex-cell {
+  flex-direction: row;
+  align-items: center;
+  /* 2026-11-18 老板拍: 卦和序号往中间靠 (原 space-between 把两群撑到格子两角)。
+     改成居中 + 适中间距, 卦群/序号群整体在格子中央, 不留左右大空。 */
+  justify-content: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  /* 2026-11-18 老板拍: 块要「拉宽」不是「拉长」—— 原 56px 高配 149px 宽 =
+     2.5:1 横条, 看着是「长条」。提到 84px 高 (1.77:1), 块是**方的块**不是长条,
+     横向空间给足, 五行色块体量才出来。 */
+  min-height: 84px;
+}
+.pg-hex-g {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  flex: 0 0 auto;
+}
+.pg-hex-m {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  flex: 0 0 auto;
+  font-size: var(--fs-body);
+  /* 序号+五行 都走白字 (--on-xxx), 跟卦画/卦名同档, 不继承正文深灰。 */
+  color: var(--on-xxx);
+}
+.pg-hex-cell:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
+/* 2026-11-18: 格子铺平成五行色 (老板拍: 对应颜色铺平, 内部白字)。
+   色块底 = --pg-wx (五行色), 卦画/卦名/卦序全走 --on-xxx (白字)。
+   hover/选中不再换灰底 (会吃掉五行色), 改描边 + 微光标记。 */
+.pg-hex-cell { background: var(--pg-wx, var(--surface)); }
+.pg-hex-cell:hover { border-color: var(--border-hover); }
+.pg-hex-cell.is-on {
+  border-color: var(--text-strong);
+  box-shadow: 0 0 0 2px var(--card-elevated), 0 0 0 3px var(--primary);
+}
+
+/* 格内卦画 (样稿 2.0): 22px 宽、全色 —— 卦画颜色 = 卦宫五行,
+   --hx 由格子内联变量给 (js 按 g.elements 置 --xxx-ink), 没数据的卦退回灰。 */
+.pg-hex-etch {
+  /* 2026-11-18 老板拍: 块内卦画稍微大一点 (22→30 宽, 笔画 2.5→3.5) */
+  --yao-w: 30px;
+  --yao-gap: 3px;
+  --yao-stroke: 3.5px;
+  --yao-break: 4px;
+  --yao-yin: 10px;
+  --yao-opacity: 1;
+  /* 格子已铺成五行色底, 卦画走 --on-xxx (白字); 阴爻断口透出五行色底。 */
+  color: var(--on-xxx);
+  flex: none;
+}
+
+/* 卦名: 竖排小格里的名字, meta 档 + 600 字重 (样稿 2.0 的 12px 格内名)。
+   字体仍是界面字 —— 全站禁衬线的纪律不因样稿改。 */
+.pg-hex-nm {
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: var(--fs-body);
+  line-height: 1.2;
+  color: var(--on-xxx);
+  letter-spacing: var(--ls-normal);
+  white-space: nowrap;
+}
+/* 底行: 卦序 + 五行, 居中一小行。 */
+.pg-hex-sub {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--fs-meta);
+  color: var(--on-xxx);
+  opacity: .85;
+}
+.pg-hex-ord {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+/* ── 五行记号: 3px 原色竖条 + 灰字 ───────────────────────────────── */
+/* 用 --pg-wx* 前缀: bazi.css 已经占了 --wx / --wx-on, 同名变量会继承串色。
+   原色只在竖条上出现 (3px), 字走灰 —— 64 个格子排过去是一片记号,
+   不是 64 张彩色便利贴。 */
+.pg-hex-wx {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+  color: var(--on-xxx);
+  opacity: .85;
+}
+.pg-hex-seal {
+  /* 2026-11-18: 格子铺成五行色块后, 3px 竖条跟整块同色 = 冗余, 隐掉。
+     五行身份已由整块底色承载, 不再需要竖条记号。 */
+  display: none;
+}
+.pg-hex-seal-jin  { --pg-wx: var(--metal); }
+.pg-hex-seal-mu   { --pg-wx: var(--wood);  }
+.pg-hex-seal-shui { --pg-wx: var(--water); }
+.pg-hex-seal-huo  { --pg-wx: var(--fire);  }
+.pg-hex-seal-tu   { --pg-wx: var(--earth); }
+
+/* 五行字色对照 (2026-11-04, 跟八字 .bz-wx-* / 梅花 .mh-wx-* 同一套语言):
+   五行只做**字色**, 走 --xxx-ink (墨色, 为字设计的对比度), 不铺色块。
+   卦盘格子的五行字 + 读卦面板「上卦 乾 · 金」的五行字都靠这五个类。 */
+.pg-hex-wxt-金 { color: var(--on-xxx); font-weight: 600; }
+.pg-hex-wxt-木 { color: var(--on-xxx); font-weight: 600; }
+.pg-hex-wxt-水 { color: var(--on-xxx); font-weight: 600; }
+.pg-hex-wxt-火 { color: var(--on-xxx); font-weight: 600; }
+.pg-hex-wxt-土 { color: var(--on-xxx); font-weight: 600; }
+
+/* ── 读卦面板 ───────────────────────────────────────────────────── */
+.pg-hex-r-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: var(--card-pad) var(--card-pad) var(--sp-3);
+  border-bottom: 1px solid var(--hairline);
+}
+.pg-hex-r-main { min-width: 0; }
+/* 卦名是这一页唯一的 26px (样稿 2.0: 染卦宫五行墨色, --hx 由 js 挂在面板上)。 */
+.pg-hex-r-nm {
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: var(--fs-display);
+  line-height: 1.15;
+  color: var(--hx, var(--text-strong));
+  letter-spacing: var(--ls-normal);
+}
+.pg-hex-r-sub {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-top: var(--sp-1);
+  font-size: var(--fs-meta);
+  color: var(--text-muted);
+}
+/* 面板里那枚五行签 (样稿 2.0 的 .wx-tag): 墨色字 + 灰底小签。
+   取代了「原色实心块印章」—— 实心块是铺色, 签是字色, 全站一条纪律。 */
+.pg-hex-d-mark { flex: none; }
+.pg-hex-wxtag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 7px;
+  border-radius: var(--r-xs);
+  background: var(--muted);
+  color: var(--hx, var(--text));
+  font-family: var(--font-ui);
+  font-size: var(--fs-meta);
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+/* 大卦象 (样稿 2.0): 一根大柱染卦宫五行墨色 + 一行上下卦小注。
+   (之前是上卦/本卦/下卦三根柱竖着摞 —— 注解柱跟主角抢戏, 收成一行字。) */
+.pg-hex-d-fig {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-5) var(--sp-4);
+  border-bottom: 1px solid var(--border-light);
+}
+.pg-hex-d-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+}
+.pg-hex-d-main .pg-yao { color: var(--hx, var(--text-strong)); }
+.pg-hex-d-cap {
+  font-family: var(--font-ui);
+  font-size: var(--fs-meta);
+  color: var(--text-muted);
+  letter-spacing: var(--ls-normal);
+}
+
+/* 卦辞: 经文字 (楷体) + 一根主色左规。**不再垫一层灰底** —— 面板本身就是底,
+   里面再套一块底就是「卡中卡」。 */
+.pg-hex-ci {
+  padding: var(--sp-1) 0 var(--sp-1) var(--sp-3);
+  font-family: var(--font-script);
+  font-size: var(--fs-title);
+  line-height: 1.85;
+  color: var(--text-strong);
+  border-left: 2px solid var(--primary);
+}
+.pg-hex-xiang {
+  margin-top: var(--sp-3);
+  font-family: var(--font-script);
+  font-size: var(--fs-body);
+  line-height: 1.85;
+  color: var(--text-dim);
+}
+.pg-hex-kw { margin-top: var(--sp-3); }
+
+.pg-hex-yao-sec {
+  margin-top: var(--sp-4);
+  padding-top: var(--sp-3);
+  border-top: 1px solid var(--border-light);
+}
+/* 爻辞整张表都是经文 ⇒ 整表换经文字 (楷体)。爻题跟爻辞本是同一句,
+   混排两种字反而把经文切碎了。 */
+.pg-hex-yao-sec .pg-table td { font-family: var(--font-script); }
+/* 爻题是「初九 / 六二」这种两字标签 —— 窄屏折行会变成竖排字, 不许折。 */
+.pg-hex-yao-sec .pg-table th:first-child { width: 56px; white-space: nowrap; }
+.pg-hex-yao-sec .pg-table td:first-child { white-space: nowrap; }
+
+/* ── 空态 ───────────────────────────────────────────────────────── */
+/* 空态要横跨整张卦表 —— 不然它只占 8 列里的 1 格, 字被挤成竖排。 */
+.pg-hex-grid-empty { grid-column: 1 / -1; }
+
+/* ── 窄屏 ───────────────────────────────────────────────────────── */
+@media (max-width: 1080px) {
+  /* 卦盘和读卦面板上下摆 —— 窄屏没有并排的余地。 */
+  .pg-hex-work { flex-direction: column; align-items: stretch; }
+  .pg-hex-read {
+    flex: none;
+    width: 100%;
+    position: static;
+    max-height: none;
+  }
+}
+@media (max-width: 720px) {
+  .pg-hex-search { width: 100%; }
+  .pg-hex-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (max-width: 420px) {
+  .pg-hex-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}

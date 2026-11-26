@@ -1,0 +1,34 @@
+{
+  "_meta": {
+    "purpose": "主对话按问题意图 → 工具类别映射 (§0.49 batch3 + R13 补)",
+    "rationale": "主对话 LLM 看到工具集 = MAIN_GENERAL_TOOLS (pangu-meta.js:98), 但 LLM 不会自动按意图分类, 需要显式映射",
+    "version": "2026.7.25-R13",
+    "owner": "pangu"
+  },
+  "categories": {
+    "法律策略": {
+      "intent_patterns": ["法律", "诉讼", "原告", "被告", "上诉", "答辩", "应诉", "策略", "风险", "合规", "判决", "判例", "案件"],
+      "tools": ["risk_assessment", "critical_point_analysis", "situation_check"]
+    },
+    "商业分析": {
+      "intent_patterns": ["分析", "趋势", "市场", "用户", "增长", "转化", "复购", "竞争", "估值", "定价"],
+      "tools": ["trend_judgment", "momentum_assessment", "metrics_dashboard", "metrics_query"]
+    },
+    "代码调试": {
+      "intent_patterns": ["调试", "debug", "bug", "报错", "失败", "异常", "代码", "脚本", "崩溃"],
+      "tools": ["read_file", "exec_command"]
+    },
+    "信息查询": {
+      "intent_patterns": ["什么", "怎么", "哪里", "何时", "搜索", "查找", "查", "谁", "为啥"],
+      "tools": ["web_search", "read_file"]
+    },
+    "内容创作": {
+      "intent_patterns": ["写", "改", "创作", "文案", "标题", "脚本", "润色"],
+      "tools": ["web_search"]
+    },
+    "时机判断": {
+      "intent_patterns": ["现在", "今晚", "明天", "时机", "何时", "机会", "窗口"],
+      "tools": ["momentum_assessment", "situation_check", "current_time"]
+    }
+  }
+}

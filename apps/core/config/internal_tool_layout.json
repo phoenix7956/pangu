@@ -1,0 +1,8 @@
+{
+  "_meta": {
+    "purpose": "内部工具顺序重组 (marketplace 内部 tab 写入; LLM schema + UI 共用)",
+    "owner": "pangu"
+  },
+  "order": [],
+  "updated_at": "2026-09-14T00:18:36.619Z"
+}

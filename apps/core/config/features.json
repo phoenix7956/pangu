@@ -1,0 +1,44 @@
+{
+  "_comment": "盘古特性开关配置",
+  "env": "development",
+  "features": {
+    "session_memory_auto_extract": {
+      "enabled": true,
+      "env": ["development", "production"],
+      "threshold_tokens": 1000,
+      "threshold_tool_calls": 10
+    },
+    "history_recording": {
+      "enabled": true,
+      "env": ["development", "production"]
+    },
+    "teams_workers": {
+      "enabled": true,
+      "env": ["development", "production"]
+    },
+    "mcp_adapter": {
+      "enabled": false,
+      "env": ["development"]
+    },
+    "debug_logging": {
+      "enabled": false,
+      "env": ["development"]
+    },
+    "agent_loop_auto_run": {
+      "enabled": false,
+      "env": ["development"]
+    },
+    "plan_mode_auto_enter": {
+      "enabled": false,
+      "env": ["development"]
+    },
+    "skill_loader_autoload": {
+      "enabled": true,
+      "env": ["development", "production"]
+    },
+    "context_compression": {
+      "enabled": true,
+      "env": ["development", "production"]
+    }
+  }
+}

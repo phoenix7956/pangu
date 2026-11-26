@@ -1,0 +1,217 @@
+Pangu · 盘古
+Copyright 2026 The Pangu Authors
+
+This product includes software developed by the Pangu Authors.
+Licensed under the Apache License, Version 2.0 — see LICENSE.
+
+Commercial use
+-------------
+Apache 2.0 is commercial-friendly: you may use, modify, distribute, and build
+commercial products or services on top of this software, including closed-source
+integration, without an open-source obligation (Apache 2.0 is not copyleft).
+When distributing, keep the copyright notices in LICENSE and this NOTICE, and
+note your modifications to existing files. The name "Pangu / 盘古" may be used
+to attribute the project, not to imply official endorsement.
+
+===============================================================================
+Third-party components
+===============================================================================
+
+The Pangu Authors may distribute third-party components under the terms of their
+respective licenses. The components distributed with this product, and their
+attribution, are listed below.
+
+-------------------------------------------------------------------------------
+1. lucide — https://lucide.dev/
+-------------------------------------------------------------------------------
+
+The browser workbench shipped in `apps/core/web/app/` contains a set of SVG icon
+paths in `apps/core/web/app/lib/icons.mjs`. Those paths reproduce shapes from
+lucide (https://lucide.dev/), a project distributed under the ISC License.
+
+No lucide JavaScript package, font file, or build artifact is bundled: only the
+path geometry is reproduced, in the project's own file. 96 of the 101 icons in
+that file are lucide-derived; the remaining five are described in section 2.
+
+The license text below is reproduced verbatim from the lucide project
+(https://github.com/lucide-icons/lucide, file `LICENSE`), including the
+attribution for the subset of icons that originate in Feather.
+
+---
+
+ISC License
+
+Copyright (c) for portions of Lucide are held by Cole Bemis 2013-2022 as part
+of Feather (MIT). All other copyright (c) for Lucide are held by Lucide
+Contributors 2022.
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
+OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
+OF THIS SOFTWARE.
+
+---
+
+The icons in `apps/core/web/app/lib/icons.mjs` that correspond to the Feather
+icons listed below are distributed under the MIT License reproduced after that
+list. Note that lucide has renamed several icons over time (for example
+`table-2` → `table`, `shopping-cart` → `shopping`), so match by shape rather
+than by name.
+
+Feather-derived icons (MIT):
+
+airplay, alert-circle, alert-octagon, alert-triangle, aperture, arrow-down,
+arrow-left, arrow-right, arrow-up, at-sign, bar-chart, battery-charging,
+battery, bell-off, bell, bluetooth, bold, book-open, book, box, calendar-off,
+calendar, camera-off, camera, cast, check-circle, check-square, check,
+chevron-down, chevron-left, chevron-right, chevron-up, chrome, circle,
+clipboard, clock, cloud-drizzle, cloud-lightning, cloud-off, cloud-rain,
+cloud-snow, cloud, code, codepen, codesandbox, columns, command, compass, copy,
+corner-down-left, corner-down-right, corner-left-down, corner-left-up,
+corner-right-down, corner-right-up, corner-up-left, corner-up-right, cpu,
+credit-card, crop, crosshair, database, delete, disc, divide-circle,
+divide-square, divide-square-vertical, divide, dollar-sign, download-cloud,
+download, dribbble, droplet, edit-2, edit-3, edit, external-link, eye-off, eye,
+facebook, fast-forward, feather, figma, file-minus, file-plus, file-text, file,
+film, filter, flag, folder-minus, folder-plus, folder, framer, frown, gift,
+git-branch, git-commit, git-merge, git-pull-request, github, gitlab, globe,
+grid, hard-drive, hash, headphones, heart, help-circle, hexagon, home, image,
+inbox, info, instagram, italic, key, layers, layout, life-buoy, link-2, link,
+linkedin, list, loader, lock, log-in, log-out, mail, map-pin, maximize, meh,
+menu, message-circle, message-square, mic-off, mic, minimize-2, minimize,
+minus-circle, minus-square, minus, monitor, moon, more-horizontal,
+more-vertical, move, music, navigation-2, navigation, octagon, open, package,
+paperclip, pause-circle, pause, pen-tool, percent, phone-call, phone-forwarded,
+phone-incoming, phone-missed, phone-off, phone-outgoing, phone, pie-chart,
+play-circle, play, plus-circle, plus-square, plus, pocket, power, printer,
+radio, refresh-ccw, refresh-cw, refresh, repeat, rewind, rotate-ccw, rotate-cw,
+rotate, rss, save, scissors, search, send, server, settings, share-2, share,
+shield-off, shield, shopping-bag, shopping-cart, shuffle, sidebar, skip-back,
+skip-forward, slack, slash, sliders, smartphone, smile, speaker, square,
+star, stop-circle, sun, sunrise, sunset, table-2, tablet, tag, target,
+terminal, thermometer, thumbs-down, thumbs-up, toggle-left, toggle-right, tool,
+trash-2, trash, trello, trending-down, trending-up, triangle, truck, tv,
+twitter, type, umbrella, underline, unlock, upload-cloud, upload, user-check,
+user-minus, user-plus, user-x, user, users, video-off, video, voicemail,
+volume-1, volume-2, volume-x, volume, watch, wifi-off, wifi, wind, x-circle,
+x-octagon, x-square, x, youtube, zap, zoom-in, zoom-out
+
+MIT License
+
+Copyright (c) 2013-2022 Cole Bemis
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+-------------------------------------------------------------------------------
+2. Five elements (wuxing) material icons — `wx-mu` / `wx-huo` / `wx-tu` /
+   `wx-jin` / `wx-shui`
+-------------------------------------------------------------------------------
+
+These five filled silhouettes (tree / flame / hill / metal ingot / water drop)
+were drawn for this project and are covered by the project's Apache 2.0
+license. Their earlier stroked drafts were taken from the corresponding lucide
+icons and re-drawn as solid shapes; the lucide attribution in section 1
+therefore also applies to them.
+
+-------------------------------------------------------------------------------
+3. plotly.js — https://plotly.com/javascript/
+-------------------------------------------------------------------------------
+
+The browser workbench's "evolution" page (self-evolution ledger trends) draws its
+charts with plotly.js, distributed under the MIT License.
+
+The vendored file is the **basic** partial bundle of plotly.js v2.35.2:
+
+    apps/core/web/app/vendor/plotly-basic.min.js
+    apps/core/web/app/vendor/plotly-basic.min.js.LICENSE.txt
+    apps/core/web/app/vendor/plotly-LICENSE.txt
+
+It is served by this repository from `web/app/vendor/` — no CDN, no network
+access, no account, no runtime dependency. The bundle is loaded on demand
+(only when the evolution page is opened), never on the other pages.
+
+plotly.js itself is distributed under the MIT License:
+
+MIT License
+
+Copyright (c) 2021 Plotly, Inc
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+The `plotly-basic.min.js.LICENSE.txt` file alongside the bundle reproduces the
+attribution of the third-party code that plotly.js ships inside that partial
+bundle, as published by the plotly.js project.
+
+-------------------------------------------------------------------------------
+4. npm runtime dependencies
+-------------------------------------------------------------------------------
+
+The following libraries are declared as runtime dependencies in
+`apps/core/package.json`. Each is distributed under its own license, all of
+which permit commercial use:
+
+| Package                        | License         |
+| ------------------------------ | --------------- |
+| bcryptjs                       | BSD-3-Clause  |
+| better-sqlite3                 | MIT             |
+| chalk                          | MIT             |
+| dotenv                         | BSD-2-Clause  |
+| hnswlib-node                   | Apache-2.0      |
+| tree-sitter                    | MIT             |
+| tree-sitter-highlight          | MIT             |
+| tree-sitter-javascript         | MIT             |
+| tree-sitter-python             | MIT             |
+| tree-sitter-typescript         | MIT             |
+| vscode-langservers-extracted   | MIT             |
+| vscode-languageserver-protocol | MIT             |
+
+These are not bundled into the repository; they are installed via
+`npm install` at build/deploy time.
+
+5. Everything else
+-------------------------------------------------------------------------------
+
+Apart from the vendored plotly.js bundle described above, the browser
+workbench is dependency-free: no JavaScript bundle, no webfont, no CDN
+reference, no external asset. Typefaces are taken from the host operating
+system's font stack.
+

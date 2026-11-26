@@ -1,0 +1,762 @@
+/* bazi.css —— 盘古工作台 · 八字排盘视图的样式
+ *
+ * 第 119 批: 八字排盘从独立静态页 (web/bazi/) 搬进工作台, 变成 #/bazi。
+ *
+ * 三条规矩:
+ *   1. 所有类名带 `bz-` 前缀 —— 工作台壳里已经有 .hint / .spin / .seg 等同名类,
+ *      不加前缀会互相污染 (踩坑日志: 搬 UI 会把两套样式打起来)。
+ *   2. 颜色一律走工作台 token (--card / --border / --text …), 三套主题自动跟随;
+ *      **不重定义** --card / --bg / --fg 这类全局变量名。
+ *   3. 五行色用工作台已有的 --wood/--fire/--earth/--metal/--water, 不另起一套;
+ *      每个五行**只有一个颜色**, 色块和文字共用 (见下面「五行色」那一段)。
+ *
+ * 2026-10-28 (第 135 批 · 视觉升级): 老板说「现在的 UI 不上档次」。
+ * 这一页原来是最典型的「能用但不上相」:
+ *   · 表单标签左置 + auto-fill 网格 ⇒ 五个输入框五种宽度, 节奏全乱;
+ *   · 分段控件是「描边 + 软底」的假分段 (阳历/农历、男/女 都是一排独立按钮);
+ *   · 卡片带阴影 (违反第 135 批原则 4: 阴影只给浮层, 贴地卡片靠明度差分层);
+ *   · 四柱表每格都画 1px 框 ⇒ 一张 Excel, 不是一张命盘;
+ *   · AI 卡用 color-mix 调边框 (脏), AI 条目底色比卡片还暗 (层次反了)。
+ * 本轮改法 (只改视觉, 不改任何数据流/逻辑):
+ *   ① 表单拆「出生时刻 / 出生地点」两段, 标签上置, 输入框等宽等高;
+ *   ② 真分段控件: 轨(--surface) + 选中白片(--card + --primary 字 + --shadow-sm);
+ *   ③ 卡片去阴影, 卡头压一档底(--card-elevated) + 发丝分隔线;
+ *   ④ 四柱表改成「横向发丝线 + 行首列分隔」的命盘版式;
+ *   ⑤ 警告/错误改成同族软底 + 左侧色条 (callout), 不用框;
+ *   ⑥ 命理专用字 (天干/地支/藏干/纳音) 用 --font-ui + 600 ⇒ 标签立得住,
+ *      不跟经文 (楷体) 抢脸 —— 第 169 批起宋体彻底退场。
+ *
+ * ⚠️ 第 128 批老板硬决定**一条都不许推翻** (见下面「五行色」那一整段注释):
+ *   五行只做**字色**不铺色块; 喜忌档位**什么都不画**。本轮没动这两条。
+ */
+
+.bz-root {
+  --bz-line: var(--border);
+  --bz-line-2: var(--border-light);
+  --bz-line-3: var(--border-hover);
+  --bz-fg: var(--foreground);
+  --bz-fg-2: var(--text-dim);
+  --bz-fg-3: var(--text-muted);
+  --bz-accent: var(--primary);
+  --bz-accent-soft: var(--primary-glow);
+  /* 分段控件的「选中片」: 浅色主题是白片压在米色轨上 (比轨亮),
+     深色/金色主题得反过来 —— 轨道比卡片亮, 选中片要再亮一档才浮得起来。
+     不写死颜色, 跟主题走。 */
+  --bz-seg-on: var(--card);
+  --bz-seg-track: var(--surface);
+}
+[data-theme="dark"] .bz-root,
+[data-theme="gold"] .bz-root {
+  --bz-seg-on: var(--surface-hover);
+}
+
+/* ── 卡片 ─────────────────────────────────────────────────────── */
+/* 第 148 批: 卡片这一层**归设计系统**了 —— `.pg-card` (1px 描边 + 8px 圆角
+   + 卡底色) 已经是全站唯一的画法, 本文件原来那份 .bz-card / .bz-card-h /
+   .bz-card-b (卡头还压一档底, 跟设计系统的「白底 + 发丝线」打架) 整套删掉。
+   留着就是「改一处不生效」的第二处定义。 */
+/* 第 143 批: 这张卡收窄到 760px。
+   第 144 批: **撤回那个收窄** —— 理由跟当时一样, 只是方向反了:
+   下面的排盘结果卡 (四柱/大运/流年那些表) 仍然占满整条轨 (1160px),
+   输入卡却只有 760px ⇒ 上下两条边对不齐, 右边空着一大片 ⇒ 一眼看过去像
+   "没排完"。现在输入卡也占满整条轨, 内容**分两栏**排 (时刻 | 地点),
+   两栏的宽度由内容决定, 不是把框摊平。 */
+/* 第 160 批 · 重写: 输入卡跟结果区**同宽**。
+   第 159 批把输入卡收窄到 880、结果卡留 1160, 是因为那时候两边都是卡片;
+   第 160 批结果区改成了扁平分区 (占满内容轨), 输入卡还窄着 ⇒
+   上下两条左沿差 54px, 一眼就歪了。现在两边都占满同一条轨。 */
+.bz-form-card { max-width: var(--col-wide); }
+@media (min-width: 1200px) {
+  .bz-form-card { margin-inline: 0; }
+}
+
+/* 第 166 批: 还没排盘的时候, 这一页只有一张输入卡, 卡下面空着 400 多像素 ——
+   顶齐排版 + 一大片空白 ⇒ 一眼像"没做完"。
+   改成: **输入卡垂直居中**, 变成一张"起一局"的入口屏 (主流 agent 的空状态
+   都这么处理: 内容少就居中, 别吊在顶上)。
+   排完盘有了结果 (#bz-chart-area 显示) ⇒ 恢复顶齐, 表格从上面开始排。 */
+.pangu-content:has(> .bz-root) {
+  display: flex;
+  flex-direction: column;
+}
+.bz-root {
+  /* 第 170 批: **顶对齐**。这里原来挂的是 `margin-block: auto` (垂直居中),
+     那是第 168 批的老画法 —— 一页只有一张表单卡时把它吊在半空,
+     上面一大片死白, 换页时高度一跳。
+     契约第 9 条: 梅花 / 八字 = 顶对齐, 底部留白收掉。
+     顶对齐之后内容从页头下面开始, 跟其余八页同一条节奏。 */
+  margin-block: 0;
+}
+
+/* 表单两栏: 左「出生时刻」, 右「出生地点」。
+   两栏之间是一条竖发丝线 —— 跟工作台状态带那条分隔线同一套语言。 */
+.bz-form-cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0 32px;
+}
+.bz-form-cols > .bz-section + .bz-section {
+  /* 两栏里的第二段不再要「上边框 + 上间距」(那是竖排时的分隔),
+     改成一条竖线。 */
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+  border-left: 1px solid var(--bz-line-2);
+  padding-left: 32px;
+}
+.bz-section {
+  /* 第 156 批: 八字页表单段头 —— 「出生时刻/出生地点」那两根竖条以前
+     各写各的透明度与粗细, 现在跟全站小节的竖条**一个画法**。 */
+}
+.bz-form-cols > .bz-section:first-child { padding-right: 0; }
+.bz-two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 860px) { .bz-two { grid-template-columns: 1fr; } }
+
+/* ── 表单 ─────────────────────────────────────────────────────── */
+/* 分段控件: 轨 + 选中白片 (不是「描边按钮排一排」)。 */
+.bz-tabs {
+  /* 第 148 批: 外观归 .pg-seg (设计系统), 这里只留**摆放**。 */
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+/* 表单两段: 出生时刻 / 出生地点。 */
+.bz-section + .bz-section {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--bz-line-2);
+}
+.bz-section-h {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 13px;
+}
+.bz-section-h::before {
+  content: "";
+  /* 第 156 批: 跟全站小节竖条同一规格 —— 2px 宽, 不淡, 实色主强调。
+     以前 opacity .55 + 3px 宽, 跟其它页的竖条不是一个东西。 */
+  width: 2px;
+  height: 14px;
+  border-radius: var(--r-xs);
+  background: var(--primary);
+}
+.bz-section-t {
+  font-size: var(--fs-meta);
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+.bz-grid-time {
+  display: grid;
+  /* 第 159 批 (重构): 时间字段 5 列, 年稍宽, 其余等宽 —— 不写死 104/76,
+     改用 fr 让整行吃满卡体宽度, 宽屏下输入框不再挤在左边半幅。 */
+  grid-template-columns: 1.2fr repeat(4, minmax(0, 1fr));
+  gap: 14px 10px;
+}
+.bz-grid-sex {
+  display: grid;
+  /* 第 159 批: 性别跟时间字段同一节奏, 控件宽度收回 200px 不变,
+     但不再单独占一行 —— 挪到时间格子的最后一格 (grid 自动流)。 */
+  grid-column: 1 / -1;
+  margin-top: 14px;
+}
+.bz-grid-sex .bz-f { flex-direction: row; align-items: center; gap: 14px; }
+.bz-grid-sex .bz-f > span:first-child { flex: 0 0 auto; }
+.bz-grid-sex .bz-seg { width: 140px; flex: 0 0 140px; }
+.bz-grid-place {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px 10px;
+}
+
+/* 「排盘」按钮跟着右栏走 —— 右边缘跟「区/县」下拉对齐。
+   (原来它在整张卡的最右下角, 离最后一个字段隔了半屏。) */
+.bz-go-row {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+@media (max-width: 900px) {
+  .bz-form-cols { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .bz-form-cols > .bz-section + .bz-section {
+    border-left: 0;
+    padding-left: 0;
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1px solid var(--bz-line-2);
+  }
+  .bz-grid-time { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .bz-grid-place { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .bz-grid-time, .bz-grid-place { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .bz-card-b { padding: 14px 16px; }
+  .bz-card-h { padding: 11px 16px; }
+}
+
+/* 标签上置 —— 六个输入框才能等宽对齐, 左边一列 30px 窄标签会把节奏打散。 */
+.bz-f {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  font-size: var(--fs-meta);
+  color: var(--bz-fg-3);
+}
+.bz-f > span:first-child { font-weight: 500; }
+.bz-f input[type=number],
+.bz-f input[type=text],
+.bz-f select {
+  width: 100%;
+  min-width: 0;
+  height: 38px;
+  padding: 0 10px;
+  font: inherit;
+  font-size: var(--fs-body);
+  color: var(--bz-fg);
+  background: var(--input);
+  border: 1px solid var(--bz-line-3);
+  border-radius: var(--r-sm);
+  transition: border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+}
+.bz-f input::placeholder { color: var(--text-muted); }
+.bz-f input:focus, .bz-f select:focus {
+  outline: none;
+  border-color: var(--bz-accent);
+  box-shadow: var(--focus-glow);
+}
+
+/* 原生 select 的系统箭头太丑 ⇒ 自己画一个 (mask + currentColor, 主题自动跟随)。 */
+.bz-sel { position: relative; display: block; }
+.bz-sel::after {
+  content: "";
+  position: absolute;
+  right: 11px;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  margin-top: -7px;
+  pointer-events: none;
+  color: var(--text-muted);
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.bz-f select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 30px;
+  cursor: pointer;
+}
+.bz-f select:disabled {
+  color: var(--text-muted);
+  background-color: var(--input);
+  border-color: var(--border);
+  /* 统一用透明度压暗 —— 深色主题里 --muted 反而比 --input 亮,
+     直接换底色会让「禁用」看起来比「可用」还突出。 */
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+/* 复选项: 横排, 勾选框跟文字对齐。 */
+.bz-opts {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  /* 第 143 批: 勾选项自己占一整行 (原来挤在第 4 列, 跟区县框并排)。 */
+  grid-column: 1 / -1;
+  flex-wrap: wrap;
+}
+/* 窄屏: 勾选项掉到下一行自己占满 (这条**必须**写在 .bz-opts 基础规则之后 ——
+   同特异度下后写的赢, 放前面会被基础规则压回去, 栅格会多出一条隐式列)。 */
+@media (max-width: 900px) {
+  .bz-opts { grid-column: 1 / -1; }
+}
+/* 第 150 批: 两个勾选项从**裸系统复选框**换成全站唯一的 .pg-switch。
+   .bz-chk 现在只是**行内摆放** (开关 + 文案), 开关本体的画法
+   (40×24 / 旋钮 / 开态底色) 归 settings.css 的 .pg-switch 独家 ——
+   这里一个外观属性都不许写, 写了就会重踩「同一个零件两个文件各画一份」。 */
+.bz-chk {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.bz-chk .pg-switch { margin-left: 0; }
+/* 第 160 批 · 重写: 开关和文案**分两个盒子**。
+   .pg-switch 是 40×24 的旋钮 —— 把「真太阳时」四个字塞进按钮里,
+   旋钮就压着字, 画面上是一团糊掉的绿。
+   现在: .bz-opt 是一行 (开关 + 文案), 按钮里只留旋钮。 */
+.bz-opt {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.bz-chk.pg-switch { margin-left: 0; }
+.bz-chk-label {
+  font-size: var(--fs-meta);
+  color: var(--bz-fg-2);
+  user-select: none;
+}
+.bz-chk[disabled] .bz-chk-label { opacity: .4; }
+.bz-opts-hint { font-size: var(--fs-meta); color: var(--bz-fg-3); }
+
+/* 性别: 跟 阳历/农历 同一套真分段 —— 但**画法归 .pg-seg / .pg-seg-i**
+   (第 148 批)。原来这里自己又画了一份 (`.bz-seg button` 0,1,1 的选择器
+   优先级比 `.pg-seg-i` 0,1,0 高, 实际生效的还是旧画法 ⇒ 「改了设计系统
+   这里没变」的老毛病)。现在这里只留摆放: 两颗按钮平分整行。 */
+.bz-seg { width: 100%; }
+.bz-seg > .pg-seg-i { flex: 1; justify-content: center; }
+
+/* 第 148 批: .bz-btn 那一整套 (普通/primary/tiny) 删掉 —— 按钮已经归
+   .pg-btn (-primary / -ghost / -danger)。只留 .bz-btn-go 的**摆放**。 */
+
+.bz-btn-go {
+  height: 38px;
+  padding: 0 22px;
+  /* 第 166 批: 原来这里写的是 --fs-body (14px), 全站其它主按钮都是 12px ——
+     同一个「主按钮」在八字页大一档, 一眼看过去就是"字号没统一"。
+     按钮字号归设计系统的 .pg-btn, 这里只留**摆放** (高度/内距)。 */
+  font-size: var(--fs-meta);
+  letter-spacing: var(--ls-normal);
+}
+.bz-btn-go::before {
+  content: "";
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  margin-right: 8px;
+  vertical-align: -3px;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='none' stroke='%23000' stroke-width='2'/%3E%3Cpolygon points='16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76' fill='%23000'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='none' stroke='%23000' stroke-width='2'/%3E%3Cpolygon points='16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76' fill='%23000'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.bz-err {
+  margin: 12px 0 0;
+  padding: 9px 13px;
+  font-size: var(--fs-body);
+  color: var(--text);
+  background: var(--red-glow);
+  border-left: 2px solid var(--error);
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+}
+
+/* ── 摘要 ─────────────────────────────────────────────────────── */
+.bz-sum { margin: 0 0 8px; font-size: var(--fs-body); color: var(--text); line-height: 1.9; }
+.bz-note { margin: 0; font-size: var(--fs-meta); color: var(--bz-fg-3); line-height: 1.7; }
+.bz-note.warn {
+  color: var(--text);
+  background: color-mix(in srgb, var(--warn) 9%, transparent);
+  border-left: 2px solid var(--warn);
+  padding: 10px 14px;
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  margin-top: 10px;
+}
+.bz-disclaimer { font-size: var(--fs-meta); color: var(--bz-fg-3); margin: 0 0 16px; line-height: 1.7; }
+
+/* ── 四柱表 ───────────────────────────────────────────────────── */
+.bz-table-wrap { overflow-x: auto; }
+/* 第 148 批: .bz-table 删掉 —— 表已经统一走 .pg-table。 */
+.bz-pillars th, .bz-pillars td {
+  /* 命盘版式: **横向发丝线**, 不画井字格 (原来每格一个框 = 一张 Excel)。 */
+  border-bottom: 1px solid var(--bz-line-2);
+  padding: 9px 14px;
+  text-align: center;
+  vertical-align: top;
+}
+/* 四柱表: 第 148 批从「820px 居中摆」改成**跟卡片左沿对齐**。
+   居中的时候表格左沿比卡头文字往右 135px, 而下面的大运/流年表又是满宽的
+   ⇒ 同一页里三张表三条左沿 ⇒ 一眼就是"没对齐" (themes.css 里
+   「左沿对不齐 = 不上档次」那条)。现在四柱 / 大运 / 流年三张表共用一条左沿。 */
+.bz-pillars { min-width: 380px; width: 100%; }
+/* 第 148 批: 表头**去掉灰底条** —— 设计系统铁律③「表头无底色」。
+   原来这里给表头铺了一整条 --surface 灰带, 是原版 UI 的遗产
+   (全站统一成「白底 + 一根 1px 实线」)。 */
+.bz-pillars th { font-weight: 600; color: var(--text-dim); }
+.bz-pillars td.rowh {
+  /* 行首列**不铺底色** —— 跟第 148 批表头去灰底同一条铁律③「表头无底色」。
+     原来铺 --surface (#202428) 比卡片 #111214 亮一大截,
+     整张表左侧糊一条灰板凳, 删掉后行首列融回卡底。 */
+  color: var(--text-dim);
+  font-weight: 600;
+  white-space: nowrap;
+  text-align: left;
+  /* 行首列跟数据区之间一条竖线 —— 表格的「书脊」。 */
+  border-right: 1px solid var(--bz-line-2);
+}
+.bz-pillars th:first-child {
+  text-align: left;
+  border-right: 1px solid var(--bz-line-2);
+}
+.bz-pillars tr:last-child th, .bz-pillars tr:last-child td { border-bottom: 0; }
+/* 藏干: 干+五行, 竖着堆。**不设 color** —— 让 .bz-wx-* 的五行色透出来
+   (否则 .bz-pillars .bz-cang 两条类名比 .bz-wx-* 更具体, 颜色会被吃掉)。 */
+.bz-pillars .bz-cang { display: block; font-size: var(--fs-meta); line-height: 1.7; }
+.bz-pillars .bz-fu { color: var(--bz-fg-2); }
+
+/* ── 大运 / 流年 / 流月: 横向一排, 点一格联动下一段 ───────────── */
+.bz-strip { min-width: 640px; }
+.bz-strip th, .bz-strip td {
+  /* 2026-11-04: 横向 padding 10px→8px, 配合干支字号收小, 整排更紧凑 */
+  padding: 8px 8px;
+  text-align: center;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--bz-line-2);
+  white-space: nowrap;
+}
+.bz-strip tr.muted th, .bz-strip tr.muted td { color: var(--bz-fg-3); font-weight: 500; font-size: var(--fs-meta); }
+.bz-strip th.rowh {
+  text-align: left;
+  color: var(--bz-fg-2);
+  font-weight: 600;
+  font-size: var(--fs-meta);
+  width: 60px;
+  /* 同 .bz-pillars td.rowh: 行首列不铺 --surface 灰底, 融回卡底。 */
+  border-right: 1px solid var(--bz-line-2);
+}
+.bz-strip td.bz-pick { cursor: pointer; transition: background .12s; }
+.bz-strip td.bz-pick:hover { background: var(--bz-line-2); }
+.bz-strip td.bz-pick.on {
+  background: var(--bz-accent-soft);
+  box-shadow: inset 0 -2px 0 var(--bz-accent);
+}
+.bz-strip tr:last-child td, .bz-strip tr:last-child th { border-bottom: 0; }
+.bz-tag-now {
+  display: inline-block;
+  margin-top: 3px;
+  font-size: var(--fs-meta);
+  color: var(--bz-accent);
+  background: var(--bz-accent-soft);
+  border-radius: var(--r-pill);
+  padding: 0 5px;
+}
+
+/* ── 干支竖排 (原版 GZ 组件): 上天干 + 十神, 下地支 + 十神 ────────── */
+.bz-gz { display: inline-flex; flex-direction: column; align-items: center; gap: 3px; line-height: 1.15; }
+.bz-gz-row { display: inline-flex; align-items: baseline; gap: 6px; }
+/* 大运 / 流年 / 流月的干支: 跟四柱表**同形态的五行彩字** (第 128 批)。
+   材质图标回来 —— 没有色块了, 图标跟字同色 (currentColor), 才是真「带上材质」。 */
+.bz-gz-ch {
+  font-family: var(--font-ui);
+  /* 2026-11-04 老板验收: 「大运流年流月字体整体再小一点」⇒ --fs-title(18) 收 --fs-body(14)。
+     阶梯钉死四档 (第 167 批 / 144-4, 146-4 守卫), 收小只能降档, 不许写字面值。 */
+  font-size: var(--fs-body);
+  font-weight: 600;
+  display: inline-block;
+  min-width: 22px;
+  text-align: center;
+}
+.bz-gz-ss { font-size: var(--fs-meta); color: var(--bz-fg-3); }
+.bz-gz-age { display: block; margin-top: 2px; font-size: var(--fs-meta); color: var(--bz-fg-3); }
+
+/* ── 五行色: 五行是**字色**, 不铺色块 (第 128 批) ─────────────────────
+   老板 10-27 两句连着说的:
+       「这颜色很清楚, 但是感觉有点怪」   ← 满屏饱和色块像荧光贴纸
+       「块乱了」 + 「不用块直接用颜色的字」← 块一多就乱, 要字色
+
+   **课件原件就是这么画的** (已核对 《喜用忌必查詢表》):
+       表头 = 色块 (木绿/火红/土褐/金橙/水蓝)
+       正文 = **粗体彩字, 白底, 不铺块** (木绿/火红/土褐/金橙/水蓝)
+   老板要的是**正文那一套**: 五行色就是字色。
+
+   色值 = 老板在课件上采的五原值 (木 #00FF1D / 火 #FF0000 / 土 #B28C21 /
+   金 #FFEE00 / 水 #0E70F2), **一个字都不许改** ⇒ 存在 --xxx 里 (唯一真源),
+   字色 --xxx-ink 也是同一组值 (三套主题完全一致)。
+   老板 10-27 亲自把字色打回过两次, 最后原话:
+       「木 #00FF1D / 火 #FF0000 / 土 #B28C21 / 金 #FFEE00 / 水 #0E70F2。
+        全都按这个, 别搞了」
+   ⇒ **不许再自作主张压暗/提亮**。浅色卡底上木 1.33:1 / 金 1.17:1 是已知代价,
+     老板知情拍板 (课件《喜用忌必查詢表》《排盘样例》自己就是这么画的:
+     艳色压浅底 + 大号粗体字)。
+
+   喜忌档位**不画任何东西** (老板 10-27: 「不要用框, 实线虚线都不要」):
+   五行色只表示五行, 档位由下面「五行与喜忌」那行的文字标签承担。 */
+
+/* .bz-wx-<五行> = 这个元素是五行身份, 字色就是它的五行色。 */
+.bz-wx-木 { --wx: var(--wood); --wx-on: var(--on-wood); --wx-ink: var(--wood-ink); color: var(--wood-ink); }
+.bz-wx-火 { --wx: var(--fire); --wx-on: var(--on-fire); --wx-ink: var(--fire-ink); color: var(--fire-ink); }
+.bz-wx-土 { --wx: var(--earth); --wx-on: var(--on-earth); --wx-ink: var(--earth-ink); color: var(--earth-ink); }
+.bz-wx-金 { --wx: var(--metal); --wx-on: var(--on-metal); --wx-ink: var(--metal-ink); color: var(--metal-ink); }
+.bz-wx-水 { --wx: var(--water); --wx-on: var(--on-water); --wx-ink: var(--water-ink); color: var(--water-ink); }
+
+/* bz-wxb = 五行身份元素 (现在只是标记, 不再铺底色)。 */
+.bz-wxb { font-weight: 600; }
+
+/* 喜忌档位: **不用框** (老板 10-27: 「不要用框, 实线虚线都不要」)。
+   课件排盘表里本来就没有档位标记 —— 喜用/忌神/财星是**另一张表**的事,
+   本表只管五行色。档位信息留在下面「五行与喜忌」那行 (每组前面有标签),
+   不往四柱表里塞框, 排盘表才干净。
+   ⇒ .bz-role-* 这几个类还挂在元素上 (给测试和数据用), 但**一条样式都不给**。 */
+
+/* 天干 / 地支: 粗体彩字 (跟课件正文那五个字一个形态), 不铺底色。 */
+.bz-pillars .bz-gan, .bz-pillars .bz-zhi {
+  display: inline-block;
+  min-width: 30px;
+}
+/* 藏干: 竖着堆, 居中。 */
+.bz-pillars .bz-cang {
+  margin: 0 auto;
+}
+/* 纳音: 只染五行色, **不套喜忌档** —— 纳音是「纳」不是「用」, 不参与命局用事。
+   但五行身份照样上色 (跟天干地支同一条语言, 免得一半块一半字)。 */
+.bz-pillars .bz-nayin {
+  font-size: var(--fs-meta);
+}
+
+/* 逐柱神煞 (2026-10-31 第 182 批恢复): 每一柱列**它自己**命中的神煞, 竖着堆。 */
+.bz-pillars .bz-shensha {
+  display: block;
+  font-size: var(--fs-meta);
+  line-height: 1.5;
+  margin: 0 auto;
+}
+
+.bz-tags {
+  gap: 7px;
+}
+
+/* 喜用 / 忌神 / 财星 chip: 跟四柱表同一套三档, 两处长得一样才读得懂。 */
+.bz-chip {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: var(--r-xs);
+  font-weight: 600;
+}
+
+.bz-g-木 { color: var(--wood-ink); }
+.bz-g-火 { color: var(--fire-ink); }
+.bz-g-土 { color: var(--earth-ink); }
+.bz-g-金 { color: var(--metal-ink); }
+.bz-g-水 { color: var(--water-ink); }
+/* 天干 / 地支: 老排盘表里这俩是最大最重的字 */
+/* 命理专用字 (天干/地支) 用衬线 —— 这是盘古的身份标识, 跟工作台其它页面的
+   无衬线 UI 字拉开距离。字色仍是老板定死的五行色, 一个字都没动。 */
+.bz-gan, .bz-zhi {
+  font-family: var(--font-ui);
+  font-size: var(--fs-title);
+  font-weight: 600;
+  line-height: 1.4;
+}
+/* 五行材质图标 (树/火焰/土山/金锭/水滴): 跟着字的五行色走 (currentColor),
+   小一点、靠中间对齐, 跟字挤在一格里像老排盘表那样。 */
+.bz-ico {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 4px;
+  opacity: .95;
+}
+.bz-ico svg { display: block; }
+/* 大运/流年的干支是 inline-flex 行, 图标按 flex 的 baseline 对齐会往下掉 ⇒ 单独居中 */
+.bz-gz-row .bz-ico { align-self: center; margin-left: 3px; }
+/* 主星行 (天干十神 / 元男元女) */
+.bz-pillars .bz-master { font-weight: 600; }
+
+/* ── 五行条 / 刑冲合害 ─────────────────────────────────────────── */
+/* 五行条 (第 128 批): 不铺色块了 —— 段底改成**中性轨**, 字走五行色。
+   段宽还是比例, 所以「多寡」照样读得出; 颜色只表示是哪个五行。 */
+.bz-bar {
+  display: flex;
+  gap: 3px;
+  height: 26px;
+  margin-bottom: 14px;
+}
+.bz-bar span {
+  display: grid;
+  place-items: center;
+  font-size: var(--fs-meta);
+  border-radius: var(--r-xs);
+  /* 中性轨。**token 必须是 --surface-hover** —— 第 128 批老板拍板,
+     tests/bazi-wuxing-solid-20261027.test.js 128w-7 直接盯这个字符串。 */
+  background: var(--surface-hover);
+  overflow: hidden;
+}
+.bz-kv { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: var(--fs-meta); color: var(--bz-fg-2); }
+.bz-kv b { color: var(--bz-fg); font-weight: 600; }
+/* chip 自己带五行字色/喜忌档, 别让上面的 .bz-kv b 把 chip 的字色盖掉
+   (.bz-kv b 是 (0,1,1), 比 .bz-wx-* 的 (0,1,0) 更具体)。 */
+.bz-kv .bz-chip, .bz-kv b.bz-chip { color: var(--wx-ink); }
+.bz-rels { margin-top: 14px; display: grid; gap: 0; font-size: var(--fs-meta); }
+.bz-rels .bz-rel {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--bz-line-2);
+}
+.bz-rels .bz-rel:last-child { border-bottom: 0; }
+.bz-rels .bz-rel .k {
+  color: var(--bz-fg-3);
+  flex: none;
+  width: 22px;
+  text-align: center;
+  border-radius: var(--r-xs);
+  background: var(--muted);
+  padding: 1px 0;
+}
+/* 冲合刑害**不许占五行色**: 五行色只表示五行。
+   以前红「冲」挨着红「火」块, 老板看着就分不清 —— 一色两义是最难查的毛病。 */
+.bz-rels .bz-rel .v { color: var(--bz-fg); }
+
+/* ── AI 解读 (放在页面最下面) ─────────────────────────────────── */
+/* 原来用 color-mix(primary 45%) 调边框 —— 那是「脏」的来源。
+   改成半透明主色描边: 淡到几乎看不出来, 但一眼知道这段是另一类东西。 */
+.bz-ai-card { border-color: var(--primary-glow-strong); }
+.bz-ai-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0 16px;
+  flex-wrap: wrap;
+}
+.bz-ai-list { display: grid; gap: 12px; }
+.bz-ai-item {
+  border: 1px solid var(--bz-line);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+  /* 原来用 --background (比卡片还暗) ⇒ 层次反了。AI 条目是「卡内的一层」⇒ card-elevated。 */
+  background: var(--card-elevated);
+}
+.bz-ai-item .bz-ai-h { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+.bz-ai-item .bz-ai-h .t { font-size: var(--fs-body); font-weight: 600; }
+.bz-ai-item .bz-ai-h .chip {
+  font-size: var(--fs-meta);
+  color: var(--bz-accent);
+  background: var(--bz-accent-soft);
+  border-radius: var(--r-pill);
+  padding: 2px 8px;
+}
+.bz-ai-item .bz-ai-b { font-size: var(--fs-body); line-height: 1.75; white-space: pre-wrap; color: var(--bz-fg); }
+.bz-ai-item .bz-ai-m { font-size: var(--fs-meta); color: var(--bz-fg-3); margin-top: 6px; }
+.bz-ai-item .bz-ai-h .t .bz-anchor-link {
+  color: var(--bz-fg);
+  text-decoration: none;
+  border-bottom: 1px dashed var(--bz-fg-3);
+}
+.bz-ai-item .bz-ai-h .t .bz-anchor-link:hover { color: var(--bz-accent); border-bottom-color: var(--bz-accent); }
+.bz-ai-item.loading .bz-ai-b { color: var(--bz-fg-3); }
+.bz-ai-item.failed { border-color: var(--error); }
+.bz-ai-item.failed .bz-ai-b { color: var(--error); }
+
+.bz-spin {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border: 2px solid var(--bz-line);
+  border-top-color: var(--bz-accent);
+  border-radius: 50%;
+  animation: bz-sp .8s linear infinite;
+  vertical-align: -1px;
+}
+@keyframes bz-sp { to { transform: rotate(360deg); } }
+
+.bz-flash td { animation: bz-flash 1.2s ease-out; }
+@keyframes bz-flash {
+  0% { background: var(--bz-accent-soft); }
+  100% { background: transparent; }
+}
+
+.bz-foot { font-size: var(--fs-meta); color: var(--bz-fg-3); padding: 4px 0 20px; }
+/* 第 143 批: 构建号改成页脚的 hover 提示 (title), 不再明写在正文里 ⇒
+   这条可见样式随之内联删掉, 留着就是死 CSS。 */
+
+/* ══ 2026-11-04 UI 重写 (样稿终版合入) ═══════════════════════════
+   老板在 redesign-sample 上逐轮验收后的定稿:
+   ① 排盘摘要 = 英雄卡 (大日主字 + 标题 + 两行 meta + 竖排喜忌徽章);
+   ② 四柱表天干/地支合并成「干支」行 (干上支下竖排), 星运/自坐/空亡收胶囊;
+   ③ 强弱推导并入「五行与喜忌」卡 (5 行结构化 + 底栏);
+   ④ 大运/流年/流月干支字号收小 (见 .bz-gz-ch)。
+   正式版不用衬线 (第 169 批起宋体彻底退场) —— 样稿的 --font-ming 不带过来。 */
+
+/* ① 排盘摘要英雄卡
+   ⚠ 字号阶梯钉死四档 (第 167 批; 144-4 / 146-4 / 146-6 守卫):
+   大日主字只能取最大档 --fs-display(26) —— 英雄感靠布局 (左侧独立列 + 竖排徽章),
+   不靠阶梯外的大字。字重只许 400/500/600。 */
+.bz-hero { display: flex; align-items: center; gap: 26px; }
+.bz-hz-ch { display: flex; flex-direction: column; align-items: center; flex: none; }
+.bz-hz-ch b {
+  font-family: var(--font-ui);
+  font-size: var(--fs-display);
+  font-weight: 600;
+  line-height: 1.1;
+}
+.bz-hz-ch span { font-size: var(--fs-meta); color: var(--bz-fg-3); margin-top: 4px; }
+.bz-hz-main { flex: 1; min-width: 0; }
+.bz-hz-title { font-size: var(--fs-title); font-weight: 600; color: var(--bz-fg); }
+.bz-hz-meta { font-size: var(--fs-meta); color: var(--bz-fg-3); margin-top: 6px; line-height: 1.7; }
+/* 竖排徽章: 身强弱·喜用 / 忌神 —— 描边 pill, 字从上往下读 */
+.bz-hz-badge {
+  flex: none;
+  writing-mode: vertical-rl;
+  letter-spacing: var(--ls-label);
+  font-size: var(--fs-meta);
+  font-weight: 600;
+  color: var(--bz-fg-2);
+  border: 1px solid var(--bz-line);
+  border-radius: var(--r-pill);
+  padding: 12px 7px;
+  background: var(--card-elevated);
+}
+.bz-hz-badge b { font-weight: 600; }
+.bz-hz-badge i {
+  display: block;
+  font-style: normal;
+  margin-top: 8px;
+  padding-top: 8px;
+  /* 123w-5: 虚线只许留给锚点下划线 ⇒ 分隔线用 hairline 实线 */
+  border-top: 1px solid var(--bz-line-2);
+  color: var(--bz-fg-3);
+}
+
+/* ② 四柱表: 干支合并竖排行 + 小胶囊 */
+/* 干上支下, 跟大运/流年/流月的 bz-gz 同一形态 */
+.bz-gzstack { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+.bz-gzstack .bz-gan, .bz-gzstack .bz-zhi { min-width: 0; }
+/* 星运/自坐/空亡的小胶囊: hairline 描边, 弱一级 */
+.bz-mp {
+  display: inline-block;
+  font-size: var(--fs-meta);
+  color: var(--bz-fg-3);
+  border: 1px solid var(--bz-line-2);
+  border-radius: var(--r-pill);
+  padding: 1px 8px;
+}
+
+/* ③ 强弱推导块 (五行与喜忌卡内) */
+.bz-drv {
+  margin-top: 10px;
+  border: 1px solid var(--bz-line-2);
+  border-radius: var(--r-md);
+  background: var(--card-elevated);
+  padding: 10px 12px;
+}
+.bz-drv-rows { display: grid; gap: 5px; }
+.bz-drv-row {
+  display: grid;
+  grid-template-columns: 58px 20px 48px 1fr;
+  align-items: baseline;
+  gap: 8px;
+  font-size: var(--fs-meta);
+}
+.bz-drv-row .d-rel { color: var(--bz-fg-2); font-weight: 600; }
+.bz-drv-row .d-wx { text-align: center; }
+.bz-drv-row .d-verdict { font-weight: 600; }
+.bz-drv-row .d-verdict.up { color: var(--success, var(--bz-fg)); }
+.bz-drv-row .d-verdict.down, .bz-drv-row .d-verdict.no { color: var(--bz-fg-3); font-weight: 500; }
+.bz-drv-row .d-gods { color: var(--bz-fg); }
+.bz-drv-row .d-note { font-style: normal; color: var(--bz-fg-3); margin-left: 6px; }
+.bz-drv-foot {
+  margin-top: 8px;
+  padding-top: 8px;
+  /* 123w-5: 虚线只许留给锚点下划线 ⇒ 分隔线用 hairline 实线 */
+  border-top: 1px solid var(--bz-line-2);
+  font-size: var(--fs-meta);
+  color: var(--bz-fg-2);
+}
+.bz-drv-foot i { font-style: normal; color: var(--bz-fg-3); margin: 0 8px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .bz-spin { animation: none; }
+}
+

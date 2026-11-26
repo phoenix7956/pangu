@@ -1,0 +1,161 @@
+{
+  "server": {
+    "port": 18901,
+    "host": "127.0.0.1"
+  },
+  "engine": {
+    "node_id": "your-node-name",
+    "agent_id": "pangu-agent"
+  },
+  "logging": {
+    "level": "INFO"
+  },
+  "memory": {
+    "max_entries": 10000,
+    "ttl_ms": 3600000
+  },
+  "llm": {
+    "protocol": "openai",
+    "temperature": 0.3,
+    "current_model_id": "my-local-model",
+    "fallback_id": "my-cloud-model",
+    "fallback_chain": [
+      "my-cloud-model"
+    ],
+    "routing": {
+      "policy": "manual",
+      "max_first_token_ms": 2500,
+      "probe_timeout_ms": 10000,
+      "cache_ttl_ms": 21600000,
+      "probe_prompt": "说一个字",
+      "_doc": "延迟感知路由 (2026-10-26 第 111 批)。policy 三档: off = 完全不探针; manual = 探针只报告慢不自动换 (默认); auto = 当前模型首字超 max_first_token_ms 或连不上时, 在「质量档优先」前提下换到更快的。质量档用模型条目已有的 quality_score, 没有就当未知档。你手动切过模型会被钉住 (manual_pinned), 自动路由不改它。 probe_prompt_tokens: 探针按多少 token 的提示词发 (默认 2000) —— 太小测不出 prefill 成本 (本地大模型慢就慢在 prefill), 太大白烧额度。",
+      "probe_prompt_tokens": 2000
+    },
+    "models": [
+      {
+        "id": "my-local-model",
+        "name": "my-local-model",
+        "provider": "local",
+        "protocol": "openai",
+        "endpoint": "http://127.0.0.1:1234/v1",
+        "api_key": "",
+        "capabilities": [
+          "chat",
+          "reasoning"
+        ],
+        "tier": "standard",
+        "enabled": true,
+        "priority": 100,
+        "context_length": 32768
+      },
+      {
+        "id": "my-cloud-model",
+        "name": "my-cloud-model",
+        "provider": "openai",
+        "protocol": "openai",
+        "endpoint": "https://api.example.com/v1",
+        "api_key": "sk-REPLACE-ME",
+        "capabilities": [
+          "chat",
+          "reasoning"
+        ],
+        "tier": "smart",
+        "enabled": true,
+        "priority": 90,
+        "context_length": 131072
+      }
+    ],
+    "role_models": {},
+    "vendor_profiles": [],
+    "cn_profiles": [],
+    "provider_guess_rules": [],
+    "media_protocol_hints": {
+      "openai": "openai_images"
+    },
+    "selfhosted_scope": "private",
+    "selfhosted_endpoints": [],
+    "_schema_doc": {
+      "_comment": "这是**配置格式说明**, 不是必填。代码真正读的字段就上面那些, 这一节只给人看。",
+      "provider_vs_protocol": "provider = 用哪家 (local/openai/anthropic/custom/...); protocol = 走哪种 API 形状 (openai/anthropic)。两者**独立**选: 任何厂商都能走 openai 兼容形状。",
+      "model_fields": "id(本机唯一名, current_model_id / fallback_chain 引用它) / endpoint(OpenAI 兼容底址) / api_key_credential(用凭证库里哪一条; **别写明文 api_key**) / api_key_env(环境变量名) / capabilities(chat|reasoning|vision|tool) / tier(fast|standard|smart|large, 只影响路由打分) / priority(同 tier 内的取舍) / context_length(会被探测值覆盖) / max_output_tokens(**端点硬上限**, 超过就 400 —— 只有物理约束才写) / local_output_tokens(**软默认**, 本地运行时的输出预算, 用户显式值可压过) / timeout_ms / tool_calls_native / reasoning_effort / media_protocol(出图/出视频协议家族)。",
+      "vendor_profiles": "厂商怪癖写成**配置**, 不是代码分支。加新厂商 = 在这里加一段, 不用改代码。可写: temperature_locked / max_output_tokens(硬上限, 必须同时写 match_id) / local_output_tokens / timeout_ms / tool_calls_native / tool_calls_unstable / reasoning_effort_channel('api'|'prompt'|'none') / match_id(provider 认不出时按模型名匹配, 支持字符串子串或 /正则/i)。",
+      "cn_profiles": "中文能力偏好**独立于**物理约束档案 —— 违反偏好不会 400, 只是路由排序低一点。可写: provider / chinese_proficiency / match_id。",
+      "provider_guess_rules": "厂商猜测规则表(从 endpoint / 模型名猜上游厂商, 用来查能力库)。可写: prov(provider 精确匹配) / ep(endpoint 正则或子串) / id(模型 id 正则或子串) + provider(命中后返回的厂商名)。返回的 provider 名要跟能力库(org 名)对得上。",
+      "media_protocol_hints": "多模态协议家族表: provider → 协议家族 (minimax / openai_images / comfyui)。模型条目里写 media_protocol 会覆盖这张表。",
+      "selfhosted_scope": "自建推理服务的口径。'private'(默认, 回环 + 内网都算自建) | 'loopback'(只算本机)。自建端点自动吃输出软默认 8192 与长超时, 不用逐个模型手写。",
+      "api_key": "密钥配哪(顺序见 modules/api_key_resolver.js): api_key_credential(点名用凭证库里哪一条) > api_key_env(环境变量名) > 凭证库 ~/.pangu/credentials.json(按厂商名约定, 如 provider=minimax ⇒ MINIMAX_API_KEY) > 约定名的环境变量 > 明文兜底。**明文别写在这个文件里** —— 盘古启动时会把落盘明文自动收编进凭证库(这里改留 api_key_credential 引用), 但收编只是搬家: 曾经泄露过的 key 仍需去厂商控制台轮换。存凭证用 scripts/setup_credential.sh <NAME> --from-env <ENV>。本机回环端点(127.0.0.1)不需要 key。",
+      "_examples": {
+        "_comment": "下面 5 个例子覆盖最常用的部署形态。llm.models[] 里放一个就够。",
+        "1_local_LM_Studio": {
+          "provider": "local",
+          "protocol": "openai",
+          "endpoint": "http://127.0.0.1:1234/v1",
+          "api_key": "",
+          "model": "任意已载入的模型名"
+        },
+        "2_local_vLLM_or_Ollama": {
+          "provider": "custom",
+          "protocol": "openai",
+          "endpoint": "http://127.0.0.1:8000/v1",
+          "api_key": "",
+          "model": "任意模型名"
+        },
+        "3_openai_official": {
+          "provider": "openai",
+          "protocol": "openai",
+          "endpoint": "https://api.openai.com/v1",
+          "api_key": "sk-...",
+          "model": "gpt-4o-mini"
+        },
+        "4_anthropic_official": {
+          "provider": "anthropic",
+          "protocol": "anthropic",
+          "endpoint": "https://api.anthropic.com",
+          "api_key": "sk-ant-...",
+          "model": "claude-sonnet-4-5"
+        },
+        "5_custom_anthropic_compatible": {
+          "provider": "custom",
+          "protocol": "anthropic",
+          "endpoint": "https://api.example.com/anthropic",
+          "api_key": "sk-...",
+          "model": "your-model"
+        }
+      }
+    }
+  },
+  "agent": {
+    "role_configs": {
+      "qian": {
+        "max_tool_iterations": 10,
+        "reasoning_effort": "medium",
+        "parallel_tools": false,
+        "auto_approve": false,
+        "sandbox_strict": true,
+        "memory_enabled": true
+      },
+      "kun": {
+        "max_tool_iterations": 80,
+        "reasoning_effort": "low",
+        "parallel_tools": false,
+        "auto_approve": false,
+        "sandbox_strict": true,
+        "memory_enabled": false
+      }
+    }
+  },
+  "tools": {
+    "disabled": []
+  },
+  "voice": {
+    "enabled": false,
+    "tts_speed": 191,
+    "auto_play": false,
+    "stt_endpoint": null,
+    "tts_provider": null,
+    "tts_api_key": null,
+    "stt_api_key": null
+  },
+  "_comment": "Pangu 节点配置示例(脱敏版) —— 复制成 config/nodes/node.json 后填真实 API key。解析顺序见 config/node_config.js。",
+  "_doc": "provider + protocol 独立选, 详见 README.md §LLM 路由"
+}

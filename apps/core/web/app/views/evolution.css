@@ -1,0 +1,41 @@
+/* evolution.css —— 进化页 (逐日账本 + 图表)
+ *
+ * 图表本体是 plotly 画的 (vendor/plotly-basic.min.js), 这份样式只管:
+ *   · 图所在的容器 (高度、宽度、留白)
+ *   · 图表库没加载出来时的兜底提示
+ * 颜色一律取盘古的 CSS 变量 —— 主题一换, 容器跟着换;
+ * plotly 画上去的那部分颜色由 JS 在重画时同步换 (见 views/evolution.mjs)。
+ */
+
+.pg-evo-chart {
+  width: 100%;
+  min-width: 0;
+}
+
+.pg-evo-plot {
+  width: 100%;
+  height: 240px;
+  min-height: 160px;
+}
+
+.pg-evo-plot .modebar {
+  display: none !important;
+}
+
+.pg-evo-nolib {
+  margin: 0 0 var(--sp-3);
+  padding: var(--sp-3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  color: var(--text-dim);
+  font-size: var(--fs-meta);
+  background: var(--card-raise);
+}
+
+/* 窄屏: 图例横排放不下, 让它换行; 左边距也收一点 (工具名那列最占地方) */
+@media (max-width: 720px) {
+  .pg-evo-plot {
+    height: 210px;
+  }
+}
+

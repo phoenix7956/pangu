@@ -1,0 +1,100 @@
+node_modules/
+dist/
+target/
+.DS_Store
+*.log
+# scripts/ contains source utilities used by launchd and release workflows.
+# Ignore only local/runtime files; keep publishable scripts visible to git.
+/scripts/*.log
+/scripts/*.tmp
+.env
+.env.*
+apps/core/node_modules/
+
+# ---- 桌面端(apps/desktop React+Vite 壳)已彻底剥离 --------------------------
+#   第 107/108 批从 git 里删掉; 2026-10-28 把磁盘残留(dist + node_modules, 392MB)
+#   一起清了 —— 本仓**不含任何桌面客户端**, 只有浏览器工作台 (apps/core/web/app)。
+#   下面这条是防呆: 谁在本地又起了个 vite 壳, 别让它被跟踪进仓。
+/apps/desktop/
+# runtime state (lives at repo root via ~/.pangu symlink)
+/memory/
+/logs/
+/state/
+/data/
+/output_files/
+/env_cache.json
+/apps/core/env_cache.json
+# router 模型池 = **运行时缓存** (由 syncRouterModelsFromConfig 从
+# config/nodes/node.json 生成)。以前它被跟踪着, 里面装的是维护者机器的
+# 模型池 (别人的克隆会看到 7 个自己根本没有的模型), 而且每次 init 同步
+# 都会把仓里那份改脏。2026-10-28 起不入库 —— 干净克隆里第一次 init 会自动建。
+/apps/core/modules/router/models.json
+# ---- 凭证: 真 token / API key 一律不入库 -----------------------------------
+# ⚠️ 命名千变万化 (evomap_token / *.json / *-bak-* / migration-bak-*),
+#    这里按目录整段封, 不靠文件名猜。
+/apps/core/credentials/*
+!/apps/core/credentials/.gitkeep
+/apps/core/config/nodes/*.json
+!/apps/core/config/nodes/example-node.json
+*.migration-bak-*
+*-migration-bak-*
+
+# ---- 本机私人运行时 / 自建小项目 / 本机状态 -------------------------------
+/apps/core/evomap/
+/apps/core/state/
+/apps/core/research/
+/apps/core/sandbox-repair-test/
+/apps/core/.learnings/
+/apps/core/memory/MEMORY.md
+/apps/core/meta/MEMORY.md
+# 根级 MEMORY.md 是**老板的私人记忆**(内网拓扑 / 私人讨论), 不是产品文档。
+/apps/core/MEMORY.md
+/apps/core/runtime/bin/
+/apps/core/runtime/build/
+/apps/core/memory/main.sqlite*
+/apps/core/memory/memory/
+
+# ---- 过程文档: 项目仓库只放项目代码, 过程文档进 ~/Documents/Codex/ ---------
+/docs/
+/specs/
+
+# ---- OpenClaw 桌面工作台外壳(本机 OpenClaw agent 的运行时目录) ----------
+#   根目录的 AGENTS.md / SOUL.md / IDENTITY.md / USER.md 是 OpenClaw 的
+#   agent-workspace 模板, **不是盘古的运行时文件** ——
+#   盘古运行时读的是 apps/core/meta/AGENTS.md。
+#   skills/ 是本机 OpenClaw 的 skill 安装目录(含与盘古无关的第三方 skill)。
+#   .archive/ 是本机归档。
+#   ⇒ 本地保留(删了会毁掉本机 OpenClaw agent 的行为), 但**不入开源树**。
+/AGENTS.md
+/SOUL.md
+/IDENTITY.md
+/USER.md
+/BOOTSTRAP.md
+/MEMORY.md
+/skills/
+/.archive/
+
+# 第 70 批: 大象辞三方对账的**外部源缓存**(npm tgz / github 抽出的大象辞)。
+#   它是**外部源的副本**, 不是产品代码 —— 切片本身(64i/sources/xiang_ci_64.txt)
+#   才是入库的产物。缓存不入库, 由 scripts/build_xiang_ci.js 按需重建。
+#   ⚠️ 缓存**不能放 64i 目录里**: 出处守卫 discoverI64Modules() 会扫 64i 下
+#     每个 .js, 缓存里的 .js 会被当成「64i 模块」⇒ 报「未登记出处」。
+/apps/core/.cache/
+
+# R47: Hermes auto-checkpoint cp_*.json, 不入主仓
+checkpoints/cp_*.json
+
+# R80: history backups + evolution runtime logs
+*.bak.*
+*.bug-*
+/evolution/
+pangu.pid
+# repair failure queue (2026-08-12 清理: 失败队列不入主仓)
+/repair/
+# 崩溃报告: 机器本地生成, 含本机绝对路径, 整目录不入库
+/issues/
+
+# 临时产物 + 探针残留
+/tmp/
+/.pangu_probe_ok
+/plan_audit.json

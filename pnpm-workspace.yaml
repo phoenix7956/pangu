@@ -1,0 +1,15 @@
+packages:
+  - 'apps/*'
+# pnpm 10+ 默认拦掉依赖的 install/postinstall 脚本 (供应链防护)。
+# 这几个是真需要编译/链接步骤的原生模块, 不授权 ⇒ 装完 require 直接炸。
+allowBuilds:
+  better-sqlite3: true
+  hnswlib-node: true
+  tree-sitter: true
+  tree-sitter-javascript: true
+  tree-sitter-python: true
+  tree-sitter-typescript: true
+  # core-js 的 postinstall 只打印一行赞助广告, 不需要跑。
+  # 但必须**显式写 false** —— pnpm 10+ 遇到没声明的 ignored build script 会**退出码 1**,
+  # CI 直接红。写 false 等于「我知道它被拦了, 别报」。
+  core-js: false

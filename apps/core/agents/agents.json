@@ -1,0 +1,257 @@
+{
+  "_comment": "8 将灵。拼音就是唯一身份, 键 = 文件名 = /api/agent/run/<name> 的 <name> (2026-10-18: 整批从英文改成拼音, 之前文件叫 analyzer.js/executor.js, 与后端 ROLES 的拼音键对不上)",
+  "_meta_agents": [
+    "qian"
+  ],
+  "_worker_agents": [
+    "kan",
+    "li",
+    "kun",
+    "dui",
+    "xun",
+    "zhen",
+    "gen"
+  ],
+  "agents": {
+    "kan": {
+      "name": "坎·kan",
+      "name_cn": "规划",
+      "hex_main": "师",
+      "hex_main_no": 7,
+      "hex_aux": [
+        "需",
+        "屯",
+        "比",
+        "履",
+        "同人",
+        "巽",
+        "谦"
+      ],
+      "hex_aux_no": [
+        5,
+        3,
+        8,
+        10,
+        13,
+        57,
+        15
+      ],
+      "role": "拆大任务、排依赖、调顺序、派活",
+      "tools": [
+        "todo_write",
+        "plan_create",
+        "task_assign"
+      ]
+    },
+    "li": {
+      "name": "离·li",
+      "name_cn": "分析",
+      "hex_main": "观",
+      "hex_main_no": 20,
+      "hex_aux": [
+        "剥",
+        "复",
+        "贲",
+        "临",
+        "明夷",
+        "晋",
+        "遁"
+      ],
+      "hex_aux_no": [
+        23,
+        24,
+        22,
+        19,
+        36,
+        35,
+        33
+      ],
+      "role": "拆变量、找pattern、抓动爻",
+      "tools": [
+        "memory_search",
+        "data_extract",
+        "pattern_find"
+      ]
+    },
+    "kun": {
+      "name": "坤·kun",
+      "name_cn": "执行",
+      "hex_main": "乾",
+      "hex_main_no": 1,
+      "hex_aux": [
+        "夬",
+        "大壮",
+        "大有",
+        "革",
+        "震",
+        "艮",
+        "夬"
+      ],
+      "hex_aux_no": [
+        43,
+        34,
+        14,
+        49,
+        51,
+        52,
+        43
+      ],
+      "role": "执行到底、出结果",
+      "tools": [
+        "exec_command",
+        "write_file",
+        "run_installer"
+      ]
+    },
+    "dui": {
+      "name": "兑·dui",
+      "name_cn": "检查",
+      "hex_main": "复",
+      "hex_main_no": 24,
+      "hex_aux": [
+        "临",
+        "明夷",
+        "睽",
+        "损",
+        "节",
+        "中孚",
+        "解"
+      ],
+      "hex_aux_no": [
+        19,
+        36,
+        38,
+        41,
+        60,
+        61,
+        40
+      ],
+      "role": "验证产出、把质量关",
+      "tools": [
+        "http_check",
+        "network_check",
+        "unit_test"
+      ]
+    },
+    "xun": {
+      "name": "巽·xun",
+      "name_cn": "巡bug",
+      "hex_main": "坎",
+      "hex_main_no": 29,
+      "hex_aux": [
+        "蹇",
+        "困",
+        "井",
+        "屯",
+        "需",
+        "讼",
+        "明夷"
+      ],
+      "hex_aux_no": [
+        39,
+        47,
+        48,
+        3,
+        5,
+        6,
+        36
+      ],
+      "role": "找隐患、抓异常、抓deadlock",
+      "tools": [
+        "static_analysis",
+        "log_scan",
+        "deadlock_detect"
+      ]
+    },
+    "zhen": {
+      "name": "震·zhen",
+      "name_cn": "反思",
+      "hex_main": "坤",
+      "hex_main_no": 2,
+      "hex_aux": [
+        "谦",
+        "豫",
+        "随",
+        "蛊",
+        "升",
+        "萃",
+        "复"
+      ],
+      "hex_aux_no": [
+        15,
+        16,
+        17,
+        18,
+        46,
+        45,
+        24
+      ],
+      "role": "复盘、归纳、沉淀",
+      "tools": [
+        "memory_write",
+        "summary_generate",
+        "lesson_extract"
+      ]
+    },
+    "qian": {
+      "name": "乾·qian",
+      "name_cn": "调度",
+      "hex_main": "泰",
+      "hex_main_no": 11,
+      "hex_aux": [
+        "否",
+        "既济",
+        "未济",
+        "咸",
+        "恒",
+        "涣",
+        "节"
+      ],
+      "hex_aux_no": [
+        12,
+        63,
+        64,
+        31,
+        32,
+        59,
+        60
+      ],
+      "role": "协调8 agent、串并行切换、仲裁",
+      "tools": [
+        "agent_route",
+        "resource_arbitrate",
+        "parallel_schedule"
+      ]
+    },
+    "gen": {
+      "name": "艮·gen",
+      "name_cn": "学习",
+      "hex_main": "巽",
+      "hex_main_no": 57,
+      "hex_aux": [
+        "渐",
+        "涣",
+        "中孚",
+        "益",
+        "升",
+        "兑",
+        "随"
+      ],
+      "hex_aux_no": [
+        53,
+        59,
+        61,
+        42,
+        46,
+        58,
+        17
+      ],
+      "role": "挖失败case、反哺经验",
+      "tools": [
+        "evolution_miner",
+        "case_extract",
+        "feedback_loop"
+      ]
+    }
+  }
+}

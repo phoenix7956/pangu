@@ -1,0 +1,63 @@
+
+# Python
+# §0.9 #1: 所有密码配置清空
+# §0.9 #2: 文件夹用 pangu 命名（仓库名）
+# §0.9 #3: 完全独立
+# 不要进 GitHub 的个人数据
+# 不要进 GitHub 的临时文件
+# 不要进 GitHub 的大目录
+# 不要进 GitHub 的日志
+# 不要进 GitHub 的运行时数据
+*.bak
+*.bak-*
+*.bak-*-*
+*.sed-broken-*
+*.pyc
+*.pyo
+*.swo
+*.swp
+.DS_Store
+.env
+.env.*
+__pycache__/
+config/nodes/*.json
+config/nodes/*.json.bak-*
+# 脱敏模板必须入库 —— 别人 clone 下来才有得抄。
+#   (这条是第 109 批踩出来的: 上面那条 *.json 规则把 example-node.json 一起挡了,
+#    结果模板根本没进仓, 而「节点配置怎么配」就断在这儿了。)
+!config/nodes/example-node.json
+credentials.json
+node_modules/
+evolution/
+logs/*.log
+logs/*.log.*
+memory/main.sqlite
+memory/main.sqlite-shm
+memory/main.sqlite-wal
+memory/memory/
+pangu_credentials.json
+pangu-credentials.json
+*.db
+*.db-shm
+*.db-wal
+logs/crash.log
+*.tar.gz
+*.tar.bz2
+runtime/bin/
+runtime/build/
+runtime/src/.build/
+runtime/target/
+# 备份目录
+_archive/
+# 数据目录
+data/
+# 学习目录
+.learn/
+# 输出文件
+output_files/
+# 根日志
+*.log
+scripts/*.err
+scripts/*.log
+# 环境缓存
+.env_cache.json

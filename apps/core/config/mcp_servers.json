@@ -1,0 +1,47 @@
+{
+  "_comment": "MCP server 配置文件 — 盘古可调的外部 MCP server 列表。command 走 PATH (不写死绝对路径); 目录用 ${HOME} / ${PANGU_HOME} 这类环境变量占位。",
+  "_version": "0.2.0",
+  "servers": [
+    {
+      "name": "github-mcp",
+      "transport": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "enabled": true
+    },
+    {
+      "name": "filesystem-mcp",
+      "transport": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "${HOME}"
+      ],
+      "enabled": true
+    },
+    {
+      "name": "comfy-mcp",
+      "transport": "stdio",
+      "command": "${HOME}/.venvs/comfy-mcp/bin/comfy-mcp",
+      "args": [],
+      "cwd": "${HOME}/ComfyUI-Installs/ComfyUI (1)/ComfyUI",
+      "env": {
+        "COMFYUI_URL": "http://127.0.0.1:8188"
+      },
+      "toolTimeouts": {
+        "run_workflow": 1200000
+      },
+      "toolArgDefaults": {
+        "run_workflow": {
+          "timeout_seconds": 900
+        }
+      },
+      "description": "ComfyUI 出图通道 (39 工具) —— 2026-10-30 从 openclaw 接收。openclaw 那边的 comfy stdio MCP 已随桌面端退休, 盘古自己起一份。",
+      "enabled": true
+    }
+  ]
+}

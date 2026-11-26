@@ -1,0 +1,106 @@
+/**
+ * BugHunter - 巡 bug
+ * 职责: 找/抓/标 bug
+ * 权限: 静态分析、模式匹配、历史 bug 库查询
+ * 边界: 不改代码、不修 bug
+ */
+class BugHunter {
+  constructor() {
+    // 常见 bug 模式库
+    this.patterns = [
+      { name: 'Null dereference', regex: /\w+\.(\w+)\s*&&\s*!\w+/, severity: 'high' },
+      { name: 'Unclosed resource', regex: /open\(|createReadStream\(|createWriteStream\(/, severity: 'medium' },
+      { name: 'Hardcoded secret', regex: /(password|secret|key|token)\s*[:=]\s*['"][^'"]+['"]/i, severity: 'high' },
+      { name: 'SQL injection', regex: /query\s*\(\s*[`"'].*\$\{.*\}/, severity: 'critical' },
+      { name: 'Race condition', regex: /await\s+\w+\.[\w.]+\s*\n.*await\s+\w+\.[\w.]+/, severity: 'medium' },
+      { name: 'Infinite loop', regex: /while\s*\(\s*true\s*\)|for\s*\(\s*;;\s*\)/, severity: 'high' }
+    ];
+  }
+
+  async execute(task, context) {
+    switch (task.type) {
+      case 'scan_file':
+        return await this.scanFile(task.filePath);
+      case 'scan_directory':
+        return await this.scanDirectory(task.dirPath);
+      case 'check_pattern':
+        return await this.checkPattern(task.filePath, task.pattern);
+      default:
+        return { ok: false, error: `Unknown scan type: ${task.type}` };
+    }
+  }
+
+  async scanFile(filePath) {
+    const { TOOLS } = require(path.join(__dirname, '..', 'modules', 'tools'));
+    try {
+      const content = await TOOLS.read_file({
+        context: { user: 'feng' },
+        params: { path: filePath }
+      });
+      
+      const bugs = [];
+      const lines = content.data.split('\n');
+      
+      lines.forEach((line, idx) => {
+        this.patterns.forEach(pattern => {
+          if (pattern.regex.test(line)) {
+            bugs.push({
+              line: idx + 1,
+              column: line.search(pattern.regex) + 1,
+              severity: pattern.severity,
+              pattern: pattern.name,
+              message: `Potential ${pattern.name}`,
+              code: line.trim()
+            });
+          }
+        });
+      });
+      
+      return {
+        ok: bugs.length === 0,
+        summary: bugs.length === 0 ? 'No bugs found' : `${bugs.length} potential bugs`,
+        data: { bugs, file: filePath }
+      };
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  }
+
+  async scanDirectory(dirPath) {
+    const { TOOLS } = require(path.join(__dirname, '..', 'modules', 'tools'));
+    try {
+      const result = await TOOLS.exec_command({
+        context: { user: 'feng' },
+        params: { command: `find ${dirPath} -name "*.js" -type f` }
+      });
+      
+      const files = (result.data.stdout || '').split('\n').filter(f => f);
+      const allBugs = [];
+      
+      for (const file of files.slice(0, 20)) { // 限制扫描文件数
+        const scan = await this.scanFile(file);
+        if (scan.data && scan.data.bugs) {
+          allBugs.push(...scan.data.bugs);
+        }
+      }
+      
+      return {
+        ok: allBugs.length === 0,
+        summary: `${allBugs.length} bugs in ${files.length} files`,
+        data: { bugs: allBugs, filesScanned: files.length }
+      };
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  }
+
+  async checkPattern(filePath, patternName) {
+    const pattern = this.patterns.find(p => p.name === patternName);
+    if (!pattern) {
+      return { ok: false, error: `Unknown pattern: ${patternName}` };
+    }
+    return this.scanFile(filePath);
+  }
+}
+
+module.exports = new BugHunter();

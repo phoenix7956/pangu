@@ -1,0 +1,774 @@
+/* settings.css —— 设置页那一层的样式 (第 117 批)
+   原版是 Tailwind, 这里翻成原生 CSS。类名一律 pg- / pangu- 前缀。
+   变量全在 themes.css 里 (--border / --surface-hover / --primary / --text-muted …)。 */
+
+/* ══ 壳: 左分类竖列 + 右内容轴 (第 170 批 · 重写) ═══════════════
+   以前: 顶上 12 个 tab 横排一条, 「保存」浮在右下角的页脚槽里。
+   现在: 左边一列分类 (`.pg-catnav`, 设计系统零件), 右边一条内容轴;
+   页头吸顶, 动作 (保存) 住在页头右上角 —— 主流 agent 的做法。 */
+.pangu-subshell {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+}
+/* 设置页这一支改成**行**布局: 左分类列 + 右内容区。 */
+.pangu-subshell-settings { flex-direction: row; }
+
+.pangu-subshell-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* 左列: 分类竖列。12 个分类一行一条, 自己滚, 不占内容宽度以外的地方。 */
+.pg-settings-aside {
+  flex: 0 0 auto;
+  width: 208px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  padding: var(--sp-5) var(--sp-3) var(--sp-5) var(--content-pad);
+  border-right: 1px solid var(--hairline);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.pg-settings-aside-title {
+  padding: 0 var(--sp-3) var(--sp-2);
+  font-size: var(--fs-meta);
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: var(--ls-normal);
+}
+/* 窄屏用的分类下拉 —— 桌面端隐藏 (见下面的窄屏媒体查询)。 */
+.pg-settings-cat-select { display: none; }
+
+.pangu-subshell-body {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  padding: 0 var(--content-pad) var(--sp-7);
+}
+
+/* 页头**吸顶**: 内容再长, 分类名和「保存」也一直在眼前。
+   页头自己是一条通宽带 (背景 + 一根下沿发丝线), 里面的内容走同一条轴 ——
+   这样内容滚上去时不会从页头两侧的缝里钻出来。 */
+.pangu-subshell-body > .pg-page-head {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  margin: 0;
+  padding: var(--sp-5) 0 var(--sp-3);
+  background: var(--background);
+  border-bottom: 1px solid var(--hairline);
+}
+.pg-settings-head-inner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-4);
+  max-width: var(--col);
+  margin-inline: auto;
+}
+.pg-settings-head-inner > .pg-page-head-main { flex: 1; min-width: 0; }
+
+/* 内容轴: 跟页头同宽 (1040), 居中。 */
+.pg-settings-slot { max-width: var(--col); margin-inline: auto; }
+
+/* 第 160 批 · 重写: 表单控件不许拉满一整条。
+   一个 1000px 宽的输入框是「后台管理系统」的招牌 —— 人的阅读宽度是
+   60~80 个汉字, 控件比那更长就只是「一根很长的线」。
+   控件收到舒服的宽度, 右边的空间留给说明和状态, 表单才有呼吸。 */
+.pg-settings-slot .pg-field { max-width: 620px; }
+.pg-settings-slot .pg-btn-row,
+.pg-settings-slot .pg-actions { max-width: 620px; }
+
+/* ══ 通用部件 (原版 _widgets.jsx) ═════════════════════════════ */
+.pg-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+.pg-toggle-row:last-child { border-bottom: 0; }
+.pg-toggle-row.is-disabled { opacity: .55; }
+.pg-toggle-text { flex: 1; min-width: 0; }
+.pg-toggle-label {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: var(--fs-body); color: var(--text);
+}
+.pg-toggle-label > svg { flex: none; }
+.pg-toggle-desc { font-size: var(--fs-meta); color: var(--text-muted); margin-top: 2px; }
+.pg-switch {
+  position: relative;
+  width: 40px;
+  height: 24px;
+  flex-shrink: 0;
+  margin-left: 12px;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  padding: 0;
+}
+.pg-switch.on {
+  background: var(--primary);
+  border-color: var(--primary);
+  box-shadow: var(--shadow-primary);
+}
+.pg-switch[disabled] { cursor: not-allowed; opacity: .55; }
+.pg-switch-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--primary-foreground);
+  box-shadow: var(--shadow-sm);
+  transition: left .16s ease;
+}
+.pg-switch.on .pg-switch-knob { left: 18px; }
+
+.pg-slider-row { padding: 10px 0; border-bottom: 1px solid var(--border-light); }
+.pg-slider-row:last-child { border-bottom: 0; }
+.pg-slider-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.pg-slider-val { font-size: var(--fs-body); font-family: var(--font-ui); color: var(--primary); }
+.pg-range { width: 100%; accent-color: var(--primary); }
+
+.pg-actionbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  max-width: 1000px;
+  padding: 0;
+  margin: 0;
+  /* 2026-10-28 第 138 批: 原来这条是 `position: sticky; bottom: 0` 贴在**滚动区里**的
+     —— 它浮在内容上面, 实时状态卡片最后两行 (工具加载 / 降级) 被它整段盖住,
+     看着像表格被切了一刀。而且 sticky 悬浮条天生要盖内容。
+     现在它搬进设置页壳专门开的页脚槽 (.pangu-subshell-footer): 不滚动、不重叠、
+     永远在底部, 也不会把表格盖掉。
+     表面 (底色 + 上边框) 由页脚槽负责, 这里只排按钮。 */
+}
+.pg-actionbar-note { margin-right: auto; font-size: var(--fs-meta); }
+/* 第 170 批: 操作栏住在**页头右上角** (页头吸顶) —— 不再是右下角
+   一个孤零零的浮条。放进页头以后它就是一排普通按钮, 跟前缀标题并排。 */
+.pg-page-head-actions .pg-actionbar {
+  justify-content: flex-end;
+  max-width: none;
+  margin: 0;
+}
+.pg-page-head-actions .pg-actionbar-note { margin-right: var(--sp-2); }
+
+.pg-btn-block { width: 100%; justify-content: center; }
+.pg-btn-grow { flex: 1; justify-content: center; }
+.pg-btn-sub { font-size: var(--fs-meta); opacity: .7; margin-left: 6px; }
+
+/* ══ 设置页公共 ═══════════════════════════════════════════════ */
+/* 第 147 批: 内容列 —— 限宽 880px 并**居中**。
+   以前是 760px 靠左钉着, 右边空一大块 ⇒ 看着像页面没做完;
+   居中之后这一栏在子导航右边是"站着的", 不是"歪着的"。
+   页根是设计系统的 `.pg-page` (见各 tab 的 render()) —— 这里只管内缩与栅格。 */
+.pg-settings-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  /* 第 160 批 · 重写: 以前限宽 880px **居中** (子导航在左边时需要) ——
+     子导航去掉以后, 内容还居中就会跟页头、跟上面的标签条**错开 60px**,
+     一眼三段没对齐。现在贴着页头左沿走, 宽度跟着内容轨走。 */
+  max-width: var(--col);
+  margin: 0;
+}
+.pg-card-header-split {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+/* 磁贴组下面跟一个小区块标题: 留一格呼吸。
+   设计系统的 `.pg-subhead` 自己只带下边距, 跟在磁贴后面时会贴着磁贴底边。 */
+.pg-settings-col .pg-card-body > .pg-subhead:not(:first-child) { margin-top: var(--sp-4); }
+.pg-section-body > .pg-subhead:not(:first-child) { margin-top: var(--sp-4); }
+.pg-msg-line {
+  font-size: var(--fs-meta);
+  padding: 8px 12px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+}
+.pg-msg-line.is-ok { border-color: var(--green); color: var(--green); background: var(--green-glow); }
+.pg-msg-line.is-bad { border-color: var(--red); color: var(--red); background: var(--red-glow); }
+.pg-err-line {
+  font-size: var(--fs-meta);
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--red);
+  color: var(--red);
+  background: var(--red-glow);
+}
+.pg-warn-box {
+  font-size: var(--fs-meta);
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--orange);
+  color: var(--orange);
+  background: var(--orange-glow);
+}
+.pg-empty-box {
+  font-size: var(--fs-meta);
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+}
+.pg-field-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+.pg-field-grow { flex: 1; min-width: 200px; }
+.pg-input.is-disabled, .pg-input[disabled], .pg-textarea[disabled] {
+  opacity: .55;
+  cursor: not-allowed;
+}
+.pg-input-sm { width: 140px; padding: 6px 10px; font-size: var(--fs-meta); }
+.pg-node-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+}
+.pg-node-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+.pg-node-text { flex: 1; min-width: 0; }
+.pg-node-name { font-size: var(--fs-body); font-weight: 500; }
+.pg-node-addr {
+  font-size: var(--fs-meta);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pg-edit-box {
+  padding: 14px;
+  border: 1px solid var(--primary);
+  border-radius: var(--r-md);
+  background: var(--primary-glow);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.pg-edit-title { font-size: var(--fs-body); font-weight: 600; }
+.pg-note-box {
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  font-size: var(--fs-meta);
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+.pg-note-title { font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.pg-note-list { margin: 0; padding-left: 18px; }
+.pg-note-list li { margin: 2px 0; }
+.pg-strong { font-weight: 600; color: var(--text); }
+.pg-italic { font-style: italic; }
+.pg-tiny { font-size: var(--fs-meta); }
+.pg-pre {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 10px;
+  /* 第 146 批: 代码块从 11px 提到 12px —— 11px 等宽在现代屏上笔画糊,
+     读代码要眯眼。代码块跟正文同属「要读的字」, 不该是最小号那一档。 */
+  font-size: var(--fs-meta);
+  overflow: auto;
+  max-height: 300px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.pg-test-area { height: 120px; font-size: var(--fs-meta); resize: vertical; }
+.pg-badge-ok { border-color: var(--green); color: var(--green); background: var(--green-glow); }
+.pg-badge-danger { border-color: var(--red); color: var(--red); background: var(--red-glow); }
+
+/* ══ 界面 (主题) ═══════════════════════════════════════════════ */
+.pg-theme-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.pg-theme-card {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--card);
+  cursor: pointer;
+  text-align: center;
+}
+.pg-theme-card:hover { border-color: var(--border-hover); }
+.pg-theme-card.on { border-color: var(--primary); box-shadow: var(--shadow-primary); }
+.pg-theme-swatch {
+  height: 64px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+/* 主题卡中心的微爻柱 (2026-11-18) —— 跟 design-system 的 .pg-yao-micro
+   同一套画法: 阳爻一整条, 阴爻断成两截。色卡取色由内联 --mini-canvas /
+   --mini-yao 给, 断口透出画布色。 */
+.pg-theme-mini {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 34px;
+}
+.pg-theme-mini-l {
+  display: flex;
+  gap: 7px;
+  height: 5px;
+  justify-content: space-between;
+}
+.pg-theme-mini-l > i {
+  flex: 1 1 0;
+  height: 100%;
+  background: var(--mini-yao);
+  border-radius: var(--r-xs);
+}
+.pg-theme-mini-l.is-yin > i { flex: 0 0 11px; }
+}
+.pg-theme-name {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: var(--fs-body);
+  font-weight: 600;
+}
+.pg-theme-rank { font-size: var(--fs-meta); color: var(--primary); }
+.pg-theme-rank.gold { color: var(--yellow); }
+.pg-theme-desc { font-size: var(--fs-meta); color: var(--text-muted); margin-top: 2px; }
+.pg-accent-grid { display: flex; gap: 8px; }
+.pg-accent-cell {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  text-align: center;
+}
+.pg-accent-cell.is-off { opacity: .5; }
+.pg-accent-dot { width: 30px; height: 30px; border-radius: 50%; margin: 0 auto 6px; }
+.pg-accent-name { font-size: var(--fs-meta); }
+.pg-accent-text { color: var(--primary); font-weight: 600; }
+
+/* ══ 权限 ══════════════════════════════════════════════════════ */
+.pg-cur-banner {
+  padding: 12px 14px;
+  border: 1px solid var(--primary);
+  border-radius: var(--r-md);
+  background: var(--primary-glow);
+  font-size: var(--fs-body);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.pg-perm-group { margin-bottom: 18px; }
+.pg-perm-group-title {
+  font-size: var(--fs-meta);
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  padding-left: 4px;
+  display: flex;
+  gap: 6px;
+}
+/* 第 147 批: 原来这里是 2px 描边 + 12px 圆角 —— 设置页自己的一套卡片样式,
+   跟全站其它卡片 (1px 描边 + 8px 圆角) 不一样 ⇒ 换页就变样。 */
+.pg-perm-card {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--card);
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+.pg-perm-card:hover { border-color: var(--border-hover); background: var(--primary-glow); }
+.pg-perm-card.on { border-color: var(--primary); background: var(--primary-glow); }
+.pg-perm-card[disabled] { opacity: .55; cursor: not-allowed; }
+.pg-perm-top { display: flex; gap: 12px; align-items: flex-start; }
+.pg-perm-ico {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--text-dim);
+}
+.pg-perm-ico > svg { width: 17px; height: 17px; }
+.pg-perm-text { flex: 1; min-width: 0; }
+.pg-perm-name { display: flex; align-items: center; gap: 8px; font-size: var(--fs-body); margin-bottom: 4px; }
+.pg-perm-desc { font-size: var(--fs-meta); color: var(--text-muted); line-height: 1.6; margin-bottom: 8px; }
+.pg-perm-flags { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* ══ MCP ════════════════════════════════════════════════════════ */
+.pg-mcp-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--card);
+  margin-bottom: 8px;
+}
+.pg-mcp-row.is-dim { opacity: .72; background: var(--surface); }
+.pg-mcp-ico {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-sm);
+  background: var(--primary-glow);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.pg-mcp-text { flex: 1; min-width: 0; }
+.pg-mcp-name { display: flex; align-items: center; gap: 8px; font-size: var(--fs-body); }
+.pg-mcp-cmd {
+  font-size: var(--fs-meta);
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pg-mcp-desc { font-size: var(--fs-meta); color: var(--text-muted); margin-top: 2px; }
+
+/* ══ 模型 ══════════════════════════════════════════════════════ */
+.pg-upstream-list {
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+}
+.pg-upstream-head {
+  font-size: var(--fs-meta);
+  color: var(--text-muted);
+  background: var(--surface-hover);
+  padding: 6px 12px;
+}
+.pg-upstream-row {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr auto auto;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  padding: 7px 12px;
+  border: 0;
+  border-top: 1px solid var(--border);
+  background: var(--card);
+  cursor: pointer;
+  font-size: var(--fs-meta);
+}
+.pg-upstream-row:hover { background: var(--primary-glow); }
+.pg-upstream-name { font-weight: 500; }
+.pg-upstream-id { font-size: var(--fs-meta); color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; }
+.pg-upstream-ctx { font-size: var(--fs-meta); color: var(--green); white-space: nowrap; }
+.pg-upstream-add {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: var(--fs-meta); color: var(--primary); white-space: nowrap;
+}
+.pg-upstream-add > svg { flex: none; }
+.pg-pool-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.pg-pool-tools { display: flex; gap: 10px; flex-wrap: wrap; }
+.pg-pool-table td { vertical-align: top; }
+.pg-pool-name { display: flex; align-items: center; gap: 6px; font-size: var(--fs-body); font-weight: 500; }
+.pg-pool-mark { display: inline-flex; color: var(--primary); }
+.pg-pool-mark > svg { width: 10px; height: 10px; }
+.pg-ico-dot { display: inline-flex; font-size: var(--fs-meta); }
+.pg-ico-dot > svg { width: 12px; height: 12px; }
+.pg-ico-dot.is-dim { opacity: .35; }
+/* 第 138 批: emoji 换成描边矢量图标以后, 状态色不会自己带 (emoji 本身是彩色的) —— 显式给。 */
+.pg-ico-ok { color: var(--green); }
+.pg-ico-bad { color: var(--red); }
+.pg-ico-warn { color: var(--orange); }
+.pg-ctx-tag {
+  margin-left: 6px;
+  font-size: var(--fs-meta);
+  padding: 1px 5px;
+  border-radius: var(--r-xs);
+  background: var(--surface);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.pg-cell-truncate { max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pg-modal-back {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 120;
+}
+.pg-modal-box {
+  width: 100%;
+  max-width: 520px;
+  max-height: 86vh;
+  overflow-y: auto;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 18px;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.pg-modal-title { font-size: var(--fs-title); font-weight: 600; }
+/* 第 149 批: 弹窗底栏**只有 components.css 一份定义** (带 12px 18px 内缩 + 顶边线)。
+   这里原来还有一份 (只 flex + gap) —— 后加载 ⇒ 赢 ⇒ 全站的弹窗底栏
+   **既没有内缩也没有顶边线**, 看着像贴上去的一段文字。删掉这份, 底栏才有边。 */
+.pg-vision-box {
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 12px;
+  background: var(--surface);
+}
+.pg-vision-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.pg-vision-right { display: flex; align-items: center; gap: 10px; }
+.pg-effort-row { display: flex; gap: 6px; }
+.pg-effort-btn {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: var(--fs-meta);
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+}
+.pg-effort-btn.on { background: var(--primary); border-color: var(--primary); color: var(--primary-foreground); }
+
+/* ══ 将灵 (第 147 批: 行 = 设计系统的 `.pg-list-row`) ═════════════
+   以前每个将灵是一张独立卡片 (`.pg-role-card`), 八张卡浮在一片空白里,
+   而且卡片自带一套标题/图标/右侧栏的画法 ⇒ 跟工具集、历史档案的清单
+   完全不是一回事。现在改成全站统一的清单行, 页面专属的只剩:
+   右侧统计、展开面板。
+   第 161 批: 原来的 `.pg-role-ico` (17px 宋体 Unicode 卦符 ☰) 删掉 ——
+   卦印 (.pg-gua-seal, 设计系统零件) 接管了这件事: 真爻柱 + 卦名。 */
+.pg-role-row { cursor: pointer; }
+.pg-role-mid { flex: 1; min-width: 0; }
+.pg-role-nm { display: flex; align-items: center; gap: 8px; }
+.pg-role-label { font-size: var(--fs-body); font-weight: 600; }
+/* 「今日 N 次 · 最近: …」那一行: 最近这次的任务描述带绝对路径,
+   不截断就把清单行撑成三行 —— 整页立刻像日志。 */
+.pg-role-live { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+/* 计数不许被长描述挤断: 中文可以在任意两字之间换行, flex 一收缩
+   「今日 0 次」就被压成两行, 清单行凭空高出一行。 */
+.pg-role-count { flex: none; white-space: nowrap; }
+.pg-role-task {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pg-role-right {
+  flex: none;
+  font-size: var(--fs-meta);
+  color: var(--text-muted);
+  text-align: right;
+  white-space: nowrap;
+}
+.pg-role-caret { flex: none; color: var(--text-muted); font-size: var(--fs-meta); }
+/* 展开的配置面板: 挂在清单行下面, 跟行之间一根发丝线。 */
+.pg-role-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: 2px 0 var(--sp-4) 40px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+/* ══ 内部工具 ══════════════════════════════════════════════════ */
+/* 第 147 批: 双 tab 走设计系统的 `.pg-seg`; 搜索行走 `.pg-toolbar`
+   —— 以前这里是设置页私有的 `.pg-tab-row` / `.pg-tools-bar` 两套。 */
+/* 工具条里的输入框占满整行会把 select 挤到第二行 —— 一行工具条折成两行,
+   看着就散。搜索框跟下拉框并排, 各自有宽度。 */
+.pg-settings-col .pg-toolbar input.pg-input { flex: 1 1 240px; width: auto; }
+.pg-settings-col .pg-toolbar select.pg-input { flex: 0 0 200px; width: 200px; }
+.pg-tools-wrap { display: flex; gap: 16px; align-items: flex-start; }
+/* 清单**不**自己滚 —— 页面已经在滚了, 再套一层滚动条 (双滚动条) 最让人晕。
+   详情面板改成 sticky: 选中一个工具, 右边那块一直看得见。 */
+.pg-tools-list { flex: 1; min-width: 0; }
+.pg-tools-wrap.has-sel .pg-tools-list { flex: 0 0 40%; }
+/* 详情面板 = 设计系统的卡片, 吸在顶部 (列表滚它不滚)。 */
+.pg-tools-wrap > .pg-card { position: sticky; top: 0; max-height: 70vh; overflow-y: auto; }
+/* 工具行 = 设计系统的 `.pg-list-row`; 这里只留三样页面专属的东西:
+   行内的小圆点、选中态、停用态。 */
+.pg-tool-row {
+  cursor: pointer;
+}
+.pg-tool-row.is-off { opacity: .55; }
+.pg-tool-row.is-sel { background: var(--primary-glow); }
+/* 第 138 批: 原来用 🟢 / ⚫ 两个 emoji 标启用状态 —— 换成 CSS 圆点 (跟主题走)。 */
+.pg-tool-dot {
+  display: inline-block; flex: none;
+  width: 7px; height: 7px; border-radius: var(--r-lg);
+}
+.pg-tool-dot.on { background: var(--green); }
+.pg-tool-dot.off { background: var(--border-hover); }
+.pg-schema-desc {
+  font-size: var(--fs-meta);
+  color: var(--text-muted);
+  background: var(--surface);
+  border-radius: var(--r-sm);
+  padding: 8px;
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+.pg-roles-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.pg-role-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+.pg-role-tab {
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--card);
+  text-align: left;
+  cursor: pointer;
+}
+.pg-role-tab.on { border-color: var(--primary); background: var(--primary-glow); }
+.pg-role-tab-ico { font-size: var(--fs-title); }
+/* 计数是**附注** —— 原来 17px, 比 tab 名 (11px) 还大一大截, 角标比标题大。 */
+.pg-role-tab-count { float: right; font-size: var(--fs-meta); font-weight: 600; color: var(--primary); }
+.pg-role-tab-name { font-size: var(--fs-meta); font-weight: 600; margin-top: 4px; }
+.pg-role-tab-desc { font-size: var(--fs-meta); color: var(--text-muted); }
+.pg-role-tool-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; }
+.pg-role-tool {
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--card);
+}
+.pg-role-tool-nm { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 4px; }
+.pg-role-tool-nm .mono { font-size: var(--fs-meta); font-weight: 600; }
+
+/* ══ 自愈 ══════════════════════════════════════════════════════ */
+.pg-audit-box {
+  padding: 10px 14px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  font-size: var(--fs-meta);
+}
+.pg-audit-box.is-ok { border-color: var(--green); background: var(--green-glow); }
+.pg-audit-box.is-bad { border-color: var(--red); background: var(--red-glow); }
+.pg-audit-line { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.pg-audit-ts { margin-left: auto; }
+.pg-audit-fails { margin-top: 6px; }
+.pg-fix-row {
+  padding: 10px 14px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  font-size: var(--fs-meta);
+  margin-bottom: 8px;
+}
+.pg-fix-row.is-ok { border-color: var(--green); background: var(--green-glow); }
+.pg-fix-row.is-bad { border-color: var(--red); background: var(--red-glow); }
+.pg-fix-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.pg-fix-meta {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: var(--fs-meta);
+}
+.pg-incident-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--card);
+  font-size: var(--fs-meta);
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+.pg-incident-ico { color: var(--orange); }
+.pg-incident-ts { margin-left: auto; }
+
+/* ══ 窄屏 ══════════════════════════════════════════════════════ */
+@media (max-width: 720px) {
+  .pangu-subshell { flex-direction: column; }
+  /* 第 170 批: 设置页窄屏 —— 分类竖列收成一个**下拉** (契约 §10)。
+     以前是「顶部横排 12 个 tab」, 窄屏一条横滚条, 挤得看不清。 */
+  .pangu-subshell-settings { flex-direction: column; }
+  .pg-settings-aside {
+    width: 100%;
+    flex: none;
+    flex-direction: column;
+    gap: 0;
+    padding: var(--sp-3) var(--content-pad);
+    border-right: none;
+    border-bottom: 1px solid var(--hairline);
+    overflow: visible;
+  }
+  .pg-settings-aside-title { display: none; }
+  .pg-settings-aside .pg-catnav { display: none; }
+  .pg-settings-cat-select { display: block; width: 100%; }
+  .pangu-subnav {
+    width: 100%;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    overflow-x: auto;
+    padding: 6px;
+    gap: 4px;
+  }
+  .pangu-subnav-title { display: none; }
+  .pangu-subnav-item {
+    flex-shrink: 0;
+    border-left: 0;
+    border-bottom: 2px solid transparent;
+    padding: 6px 10px;
+  }
+  .pangu-subnav-item.on { border-left-color: transparent; border-bottom-color: var(--primary); }
+  .pangu-subnav-desc { display: none; }
+  .pangu-subshell-body { padding: 14px; }
+  .pangu-subshell-footer { padding-left: 14px; padding-right: 14px; }
+  .pg-theme-grid { grid-template-columns: 1fr; }
+  /* 模型池这张表有五列 —— 窄屏收掉「接入地址」那列 (URL 在编辑弹窗里看),
+     名字列收窄并截断, 一屏读得完, 不出横向滚动条。 */
+  .pg-pool-table th:nth-child(4),
+  .pg-pool-table td:nth-child(4) { display: none; }
+  .pg-pool-table td:first-child { max-width: 150px; overflow: hidden; text-overflow: ellipsis; }
+  .pg-tools-wrap { flex-direction: column; }
+  .pg-tools-wrap.has-sel .pg-tools-list { flex: 1; }
+  .pg-upstream-row { grid-template-columns: 1fr auto; }
+  .pg-upstream-id { display: none; }
+}

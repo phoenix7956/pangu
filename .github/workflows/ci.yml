@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  guard:
+    name: guard chain (node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['22']
+    steps:
+      - uses: actions/checkout@v4
+
+      # pnpm 必须排在 setup-node 前面 —— `cache: pnpm` 要调 `pnpm store path`。
+      # 版本跟根 pnpm-lock.yaml (lockfileVersion 9.0) 对齐, 且认得 pnpm-workspace.yaml
+      # 里的 allowBuilds 名单 (原生模块编译授权)。
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      # 原生模块 (better-sqlite3 / hnswlib-node / tree-sitter) 要编译工具链
+      - name: install native build deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3 make g++
+
+      - name: install
+        run: pnpm install --frozen-lockfile
+
+      # 节点配置不在仓里 (凭证不入库) —— 用脱敏模板兜底, 守卫不依赖真配置
+      - name: prepare node config
+        working-directory: apps/core
+        run: |
+          cp config/nodes/example-node.json config/nodes/node.json
+
+      - name: guard chain
+        working-directory: apps/core
+        run: npm run test:chain
+
+      - name: hygiene (tracked-file scan)
+        working-directory: apps/core
+        run: node --test tests/open-source-hygiene-20261026.test.js

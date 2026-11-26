@@ -1,0 +1,30 @@
+name: 问题反馈
+description: 盘古的行为跟预期不一致
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: 发生了什么
+      description: 你期望什么，实际是什么
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: 复现步骤
+      placeholder: |
+        1. 调 POST /api/pangu/agent/stream，body 是 ...
+        2. 看到 ...
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: 相关日志 / 错误原文
+      render: shell
+  - type: input
+    id: version
+    attributes:
+      label: 版本
+      placeholder: GET /api/version 的输出

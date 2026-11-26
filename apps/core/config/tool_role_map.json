@@ -1,0 +1,130 @@
+{
+  "_meta": {
+    "version": "2026.10.18-pinyin",
+    "purpose": "工具 → 8 子 Agent 角色映射 (严格独占, 每个工具只归 1 个角色, §0.7 Pangu 2.0 Agent Cluster)",
+    "rules": [
+      "严格不重叠: 每个工具只归 1 个角色 (老板原话: 8个都掉一样的工具那就没意义)",
+      "基础工具(current_time/task_done/permission_*) 按核心职责归 1 个角色, 不跨角色共享",
+      "读类工具(read_file/memory_search) 按主用归: 找 bug 归 巽, 推理归 离, 复盘归 震",
+      "坤 不分析 / 离 不执行 / 兑 不改 / 巽 不修 / 坎 不执行 (§0.7 5 边界)"
+    ],
+    "roles_count": 8,
+    "tools_count": 104,
+    "v3_changes": "补 23 个 v2 未分配工具 (checkpoint_*/git_*/metrics_*/session_*/plan_*/todo_write/list_pangu_agents/permission_apply/record_audio/take_photo/self_correct/file_edit_batch)"
+  },
+  "kun": {
+    "name": "坤",
+    "purpose": "执行型 — 写、改、跑、生成 artifact (不分析不思考)",
+    "tools": [
+      "exec_command",
+      "write_file",
+      "file_edit",
+      "run_installer",
+      "batch_execute",
+      "code_execute",
+      "clipboard_read",
+      "clipboard_write",
+      "archive_create",
+      "archive_extract"
+    ],
+    "label": "坤·手 — 落盘/跑命令/生成 artifact, 执行到底"
+  },
+  "li": {
+    "name": "离",
+    "purpose": "推理型 — 看、读、推、判 (64 卦 + LLM, 不执行)",
+    "tools": [
+      "list_directory",
+      "read_file",
+      "file_grep",
+      "file_find",
+      "search_files",
+      "memory_search",
+      "data_extract",
+      "pattern_find",
+      "situation_check",
+      "trend_judgment",
+      "risk_assessment",
+      "momentum_assessment",
+      "main_force_analysis",
+      "web_search",
+      "web_fetch"
+    ],
+    "label": "离·眼 — 列目录/读文件/检索/研判, 不写盘"
+  },
+  "dui": {
+    "name": "兑",
+    "purpose": "验证型 — 评、验、测 (不改不修)",
+    "tools": [
+      "http_check",
+      "network_check",
+      "response_verify",
+      "exec_command"
+    ],
+    "label": "兑·舌/秤 — 验 pass/fail 对账, 不修不改"
+  },
+  "xun": {
+    "name": "巽",
+    "purpose": "找 bug — 静态分析 (不修, 只标)",
+    "tools": [
+      "exec_command",
+      "file_grep",
+      "search_files",
+      "memory_search",
+      "pattern_match",
+      "regression_check"
+    ],
+    "label": "巽·耳 — 找隐藏 bug/安全隐患/回归, 只找不修"
+  },
+  "kan": {
+    "name": "坎",
+    "purpose": "拆任务 — 纯 LLM 推理 (不执行, 只规划)",
+    "tools": [
+      "todo_write",
+      "plan_create",
+      "task_assign",
+      "checkpoint_create",
+      "checkpoint_list",
+      "checkpoint_rollback",
+      "plan_approve",
+      "plan_reject",
+      "plan_status"
+    ],
+    "label": "坎 · 拆 — 拆大任务→子任务清单+依赖+耗时"
+  },
+  "zhen": {
+    "name": "震",
+    "purpose": "复盘 — L2 矿工 + 失败 case (评、改、学)",
+    "tools": [
+      "memory_search",
+      "strategy_rewind",
+      "counterfactual",
+      "memory_read"
+    ],
+    "label": "震·心 — 复盘为什么成/败, 破局点 (兑 fail 时触发)"
+  },
+  "qian": {
+    "name": "乾",
+    "purpose": "派活 — 任务→角色映射 (派、合、调, 终结)",
+    "tools": [
+      "team_dispatch",
+      "resource_pool",
+      "task_done",
+      "list_pangu_agents",
+      "permission_apply"
+    ],
+    "label": "乾·调度 — 派活/合/调, 终结"
+  },
+  "gen": {
+    "name": "艮",
+    "purpose": "学习 — 知识库 + 缓存 (学、忆、优)",
+    "tools": [
+      "memory_search",
+      "memory_write",
+      "pattern_summarize",
+      "rule_extract",
+      "session_save",
+      "session_list"
+    ],
+    "label": "艮·骨 — 沉淀经验→规则→长期记忆 (任务 done 后自动触发)"
+  }
+}

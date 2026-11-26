@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>盘古 Pangu · API 索引</title>
+
+<!-- 令牌唯一真源 = 工作台的主题文件 (宣纸·青玉)。本页**不复制任何色值** ——
+     换主题时这一页跟着换, 不会出现「索引页一种色、工作台另一种色」。
+     零外部资源: 没有 webfont、没有 CDN、没有外链样式。 -->
+<!-- 第 141 批: 资源与链接一律**相对** —— 不带前导斜杠。
+     这一页住在 /api, 所以相对地址由浏览器解析成 /themes.css、/health、/api/version …;
+     盘古挂在子路径下时同样成立。-->
+<link rel="stylesheet" href="themes.css">
+
+<style>
+  /* 本页只管版式; 所有颜色 / 字体 / 圆角 / 动效都走 themes.css 的令牌。 */
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-ui);
+    font-size: 14px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  /* 纸纹: 极淡噪点, 跟工作台同一张纸 (theme 里定义的 data URI, 不是外链) */
+  body::before {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image: var(--paper-tex);
+  }
+  a { color: inherit; text-decoration: none; }
+
+  .pgapi { position: relative; z-index: 1; max-width: 880px; margin: 0 auto; padding: 64px 24px 96px; }
+
+  /* ── 五行签名条: 品牌标记 (色值走令牌, 三套主题一致) ───────────── */
+  .pgapi-rule { display: flex; gap: 3px; height: 3px; margin: 0 0 22px; }
+  .pgapi-rule i { width: 26px; border-radius: 2px; }
+  .pgapi-rule i:nth-child(1) { background: var(--wood); }
+  .pgapi-rule i:nth-child(2) { background: var(--fire); }
+  .pgapi-rule i:nth-child(3) { background: var(--earth); }
+  .pgapi-rule i:nth-child(4) { background: var(--metal); }
+  .pgapi-rule i:nth-child(5) { background: var(--water); }
+
+  /* ── 抬头 ─────────────────────────────────────────────────── */
+  .pgapi-head { margin-bottom: 52px; }
+  .pgapi-mark {
+    display: flex; width: 44px; height: 44px; margin-bottom: 22px;
+    flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+    border: 1px solid var(--side-chip-border); border-radius: var(--r-md);
+    background: var(--side-chip-bg);
+  }
+  .pgapi-mark i { display: block; width: 24px; height: 3px; border-radius: 2px; background: var(--side-accent); }
+  /* 三爻: 上阳 · 中阴 (一分为二, 右侧一点朱砂) · 下阳 */
+  .pgapi-mark i.is-split {
+    width: 24px;
+    background: linear-gradient(90deg, var(--side-accent) 0 38%, transparent 38% 62%, var(--accent) 62%);
+  }
+  .pgapi-title {
+    margin: 0; font-family: var(--font-script); font-size: 30px; font-weight: 600; line-height: 1.1;
+  }
+  .pgapi-eyebrow {
+    margin: 10px 0 0; font-size: 11px; font-weight: 500; text-transform: uppercase; color: var(--text-muted);
+  }
+  .pgapi-lead {
+    max-width: 34em; margin: 22px 0 0; font-family: var(--font-script);
+    font-size: 16px; line-height: 1.85; color: var(--text-dim);
+  }
+  .pgapi-lead b { font-weight: 600; color: var(--text-strong); }
+
+  /* ── 主行动 ───────────────────────────────────────────────── */
+  .pgapi-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-top: 28px; }
+  .pgapi-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 9px 16px; border-radius: var(--r-sm);
+    font-size: 13px; font-weight: 600;
+    transition: box-shadow var(--dur) var(--ease);
+  }
+  .pgapi-btn svg { width: 15px; height: 15px; stroke-width: 2; }
+  .pgapi-btn-primary {
+    background: var(--primary); color: var(--primary-foreground);
+    box-shadow: var(--shadow-primary);
+  }
+  .pgapi-btn-primary:hover { box-shadow: var(--shadow-md); }
+  .pgapi-btn-primary:focus-visible { outline: none; box-shadow: var(--focus-glow); }
+  .pgapi-note { font-size: 12px; color: var(--text-muted); }
+
+  /* ── 端点表 ───────────────────────────────────────────────── */
+  .pgapi-sec { margin-top: 48px; }
+  .pgapi-sec > h2 {
+    display: flex; align-items: baseline; gap: 12px; margin: 0 0 14px;
+    padding-top: 16px; border-top: 1px solid var(--border-light);
+    font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--text-muted);
+  }
+  .pgapi-sec > h2 span { font-family: var(--font-ui); font-size: 13px; text-transform: none; color: var(--text-dim); }
+  .pgapi-scroll { overflow-x: auto; }
+  table.pgapi-table { width: 100%; border-collapse: collapse; }
+  .pgapi-table td { padding: 9px 12px 9px 0; border-bottom: 1px solid var(--border-light); vertical-align: top; }
+  .pgapi-table tr:last-child td { border-bottom: 0; }
+  .pgapi-table td:first-child { width: 62px; padding-right: 0; }
+  .pgapi-table td:nth-child(2) { width: 250px; }
+  .pgapi-table code { font-family: var(--font-mono); font-size: 12.5px; color: var(--text-strong); }
+  .pgapi-desc { color: var(--text-dim); }
+  .pgapi-m {
+    display: inline-block; min-width: 40px; padding: 2px 6px; border-radius: var(--r-xs);
+    font-family: var(--font-mono); font-size: 10px; font-weight: 600; line-height: 1.6;
+    text-align: center;
+  }
+  .pgapi-m-get { background: var(--green-glow); color: var(--green); }
+  .pgapi-m-post { background: var(--primary-glow); color: var(--primary); }
+
+  /* ── 接入示例 ─────────────────────────────────────────────── */
+  .pgapi-pre {
+    margin: 0; padding: 16px 18px; overflow-x: auto;
+    border: 1px solid var(--border); border-radius: var(--r-md);
+    background: var(--card-elevated);
+    font-family: var(--font-mono); font-size: 12.5px; line-height: 1.75; color: var(--text-dim);
+  }
+
+  /* ── 页脚 ─────────────────────────────────────────────────── */
+  .pgapi-foot {
+    display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 56px; padding-top: 18px;
+    border-top: 1px solid var(--border);
+    font-size: 12px; color: var(--text-muted);
+  }
+  .pgapi-foot a { color: var(--text-dim); border-bottom: 1px solid var(--border-hover); }
+  .pgapi-foot a:hover { color: var(--primary); border-bottom-color: var(--primary); }
+
+  @media (max-width: 640px) {
+    .pgapi { padding: 40px 18px 72px; }
+    .pgapi-title { font-size: 26px; }
+    .pgapi-table td:nth-child(2) { width: auto; }
+    .pgapi-table td:first-child { width: 52px; }
+  }
+</style>
+
+<script>
+  // 主题跟工作台同一个来源 (localStorage 'pangu.ui.theme') —— 在这一页切主题,
+  // 回工作台也是同一个主题。样式加载前同步定, 防闪白。
+  (function () {
+    try {
+      var t = localStorage.getItem('pangu.ui.theme') || 'light';
+      document.documentElement.setAttribute('data-theme', t);
+    } catch (e) {
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+  })();
+</script>
+</head>
+<body>
+
+<main class="pgapi">
+  <header class="pgapi-head">
+    <div class="pgapi-rule" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="pgapi-mark" aria-hidden="true"><i></i><i class="is-split"></i><i></i></div>
+    <h1 class="pgapi-title">盘古</h1>
+    <p class="pgapi-eyebrow">Pangu · 易学推演内核</p>
+    <p class="pgapi-lead">
+      <b>64 卦 / 384 爻 / 阴阳五行 / 八将灵调度 / 自我进化。</b>
+      谋断走确定性推演 —— 卦爻辞、纳甲、八宫、旺衰由内核算, 不靠模型记忆。
+      盘古是一套易学推演 API，同时附带一个浏览器工作台。
+    </p>
+    <div class="pgapi-actions">
+      <a class="pgapi-btn pgapi-btn-primary" href="./">
+        打开工作台
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+        </svg>
+      </a>
+      <span class="pgapi-note">对话 · 六十四卦 · 梅花起卦 · 八字排盘 · 历史 · 工具 · 状态</span>
+    </div>
+  </header>
+
+  <section class="pgapi-sec">
+    <h2>服务与配置 <span>探针、运行配置、模型池</span></h2>
+    <div class="pgapi-scroll">
+      <table class="pgapi-table">
+        <tbody>
+          <tr><td><span class="pgapi-m pgapi-m-get">GET</span></td><td><code>/health</code></td><td class="pgapi-desc">存活探针</td></tr>
+          <tr><td><span class="pgapi-m pgapi-m-get">GET</span></td><td><code>/api/version</code></td><td class="pgapi-desc">版本号</td></tr>
+          <tr><td><span class="pgapi-m pgapi-m-get">GET</span></td><td><code>/api/config</code></td><td class="pgapi-desc">运行配置 (provider / 模型 / 节点)</td></tr>
+          <tr><td><span class="pgapi-m pgapi-m-get">GET</span></td><td><code>/api/models/list</code></td><td class="pgapi-desc">模型池清单</td></tr>
+          <tr><td><span class="pgapi-m pgapi-m-get">GET</span></td><td><code>/api/modules</code></td><td class="pgapi-desc">模块清单</td></tr>
+          <tr><td><span class="pgapi-m pgapi-m-get">GET</span></td><td><code>/api/nodes</code></td><td class="pgapi-desc">推理节点清单</td></tr>
+          <tr><td><span class="pgapi-m pgapi-m-get">GET</span></td><td><code>/api/skills</code></td><td class="pgapi-desc">已装 skill 清单</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="pgapi-sec">
+    <h2>易学推演 <span>确定性内核, 不走模型</span></h2>
+    <div class="pgapi-scroll">
+      <table class="pgapi-table">
+        <tbody>
+          <tr><td><span class="pgapi-m pgapi-m-get">GET</span></td><td><code>/api/hexagrams</code></td><td class="pgapi-desc">64 卦全文 (直读 64i 真源)</td></tr>
+          <tr><td><span class="pgapi-m pgapi-m-post">POST</span></td><td><code>/api/meihua/cast</code></td><td class="pgapi-desc">梅花易数起卦</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="pgapi-sec">
+    <h2>Agent 与会话 <span>八将灵调度 / 流式对话</span></h2>
+    <div class="pgapi-scroll">
+      <table class="pgapi-table">
+        <tbody>
+          <tr><td><span class="pgapi-m pgapi-m-get">GET</span></td><td><code>/api/pangu/subagents/roles</code></td><td class="pgapi-desc">八将灵清单与职责</td></tr>
+          <tr><td><span class="pgapi-m pgapi-m-get">GET</span></td><td><code>/api/sessions</code></td><td class="pgapi-desc">会话列表</td></tr>
+          <tr><td><span class="pgapi-m pgapi-m-post">POST</span></td><td><code>/api/pangu/agent/stream</code></td><td class="pgapi-desc">主 agent 流式对话 (SSE)</td></tr>
+          <tr><td><span class="pgapi-m pgapi-m-post">POST</span></td><td><code>/api/message/stream</code></td><td class="pgapi-desc">兼容端点 (流式)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="pgapi-sec">
+    <h2>浏览器工作台 <span>纯静态 · 无需安装</span></h2>
+    <div class="pgapi-scroll">
+      <table class="pgapi-table">
+        <tbody>
+          <tr><td><span class="pgapi-m pgapi-m-get">GET</span></td><td><code>/</code></td><td class="pgapi-desc">工作台 (对话)</td></tr>
+          <tr><td><span class="pgapi-m pgapi-m-get">GET</span></td><td><code>/bazi</code></td><td class="pgapi-desc">工作台的八字排盘页</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="pgapi-sec">
+    <h2>接入 <span>对话走 SSE, 逐段返回</span></h2>
+    <pre class="pgapi-pre"><code>curl -N -X POST http://127.0.0.1:18901/api/pangu/agent/stream \
+  -H "Content-Type: application/json" \
+  -d '{"message":"起一卦"}'</code></pre>
+  </section>
+
+  <footer class="pgapi-foot">
+    <span>盘古 Pangu · 开源内核</span>
+    <a href="./">工作台</a>
+    <a href="health">存活探针</a>
+    <a href="api/version">版本号</a>
+  </footer>
+</main>
+
+</body>
+</html>

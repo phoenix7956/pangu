@@ -1,0 +1,372 @@
+/* views.css —— 主视图层的样式 (第 117 批)
+ *
+ * 搬的是原版 `apps/desktop/src/styles/index.css` 里那套 Tailwind 类对应的原生 CSS。
+ * 原版用 utility class (grid-cols-3 / text-xs / gap-5 ...), 这里合成有名字的类。
+ * 视觉值照抄原版, 不自己发挥。
+ */
+
+/* ── 通用小工具 ───────────────────────────────────────────────── */
+.pg-mt { margin-top: var(--sp-5); }
+.pg-mb { margin-bottom: var(--sp-2); }
+.ml-auto { margin-left: auto; }
+
+/* ── 工具集 (Marketplace) ─────────────────────────────────────── */
+/* 第 147 批: 这一页原来是**自己一套壳** —— .pg-mp 撑满高度 + 三条自造横条
+ *   (页签条 / 工具条 / 筛选条) + 自己滚动 (grid overflow-y)。
+ *   别的页都是「一条流 + 统一的 .pg-toolbar」, 就它像拼进来的。
+ *   现在: 页面根 = .pg-page, 页签与工具条 = .pg-toolbar + .pg-seg,
+ *   筛选片 = .pg-chip, 列表 = .pg-list。
+ *   下面这些类**只管摆放** (间距/列宽/滚动), 外观一律走设计系统零件。 */
+
+.pg-mp { display: flex; flex-direction: column; min-height: 0; }
+
+/* 工具条外面那层壳: 只负责外距 */
+.pg-mp-bar { margin-top: var(--sp-3); }
+
+/* 工具条右侧的动作区 (搜索 + 刷新 + 导入 + 新建) */
+.pg-mp-bar-actions { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; }
+
+.pg-mp-pane { display: flex; flex: 1; flex-direction: column; min-height: 0; }
+
+.pg-mp-search { width: 240px; }
+.pg-mp-search-sm { width: 200px; }
+
+/* 筛选组: 工具条里的一组小标签 */
+.pg-mp-filter-group { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.pg-mp-filter-label { margin-right: 2px; font-size: var(--fs-meta); color: var(--text-muted); }
+/* 第 170 批: 分类/来源的筛选片改成**下拉** —— 一屏十几个小药丸看着像筛选墙。 */
+.pg-mp-filter-select {
+  width: 132px;
+  height: 30px;
+  padding: 0 26px 0 10px;
+  font-size: var(--fs-meta);
+  color: var(--text-dim);
+}
+
+/* 列表: 设计系统的 .pg-list (行与行之间一根发丝线, 没有卡片框) */
+.pg-mp-list { margin-bottom: var(--sp-4); }
+
+/* 行的主体分两列: 名字+来源 | 描述。
+   每多一列, 眼睛就要多横跨一次 —— 十九行下来就是十九次, 所以只留两列。 */
+.pg-mp-row-main {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  column-gap: var(--sp-4);
+  align-items: center;
+}
+.pg-mp-row-meta { display: flex; min-width: 0; flex-direction: column; gap: 2px; }
+.pg-mp-row-tags { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.pg-mp-row-desc { display: flex; min-width: 0; flex-direction: column; gap: 2px; }
+.pg-mp-row-desc p { margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* 行内命令 (等宽小字) */
+.pg-mp-row-cmd {
+  /* 第 156 批: 行内命令走设计系统 .pg-mono (等宽 + 12px), 跟其它等宽
+     片段同一个字号 —— 以前这里多写了一层 11px, 工具集页里等宽字两档。 */
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-family: var(--font-mono); font-size: var(--fs-meta);
+  color: var(--text-muted);
+}
+/* 内部工具的说明: 一行, 长了省略 (设计系统的 .pg-list-desc 不带截断,
+   那是给「副标题」用的; 这条说明可能有几百字) */
+.pg-mp-tool-desc { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* 行内 slug (等宽小字, 可截断) */
+.pg-mp-row-slug { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* 空态里的大图标 */
+.pg-mp-empty-mark {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 52px; height: 52px; margin: 0 auto 6px;
+  color: var(--text-muted);
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-md);
+}
+
+/* 删除按钮: 只占自己的位置, 不许被挤变形 */
+.pg-mp-del { flex: none; }
+
+/* 内部工具: 启用/停用的小圆点 */
+.pg-mp-internal-dot {
+  display: inline-block; width: 8px; height: 8px; flex: none;
+  border-radius: 50%; background: var(--text-muted);
+}
+.pg-mp-internal-dot.is-on { background: var(--green); }
+/* 序号: 等宽小字, 跟在名字前面 */
+.pg-mp-internal-idx { margin-right: 8px; color: var(--text-muted); }
+
+/* 来源标记: 只有图标带色 (五种来源色), 文字一律安静 */
+.pg-mp-src-ico { display: inline-flex; color: var(--src-hue, var(--text-dim)); }
+.pg-mp-src-ico svg { width: 11px; height: 11px; }
+/* 第 170 批: 来源色**提到令牌层** (themes.css) —— 页面层不许藏色值,
+   换主题时它不跟着变, 于是同一个界面出现两套颜色。 */
+.pg-src-claude { --src-hue: var(--src-claude); }
+.pg-src-skillhub { --src-hue: var(--src-skillhub); }
+.pg-src-clawhub { --src-hue: var(--src-clawhub); }
+.pg-src-github { --src-hue: var(--src-github); }
+.pg-src-pangu { --src-hue: var(--purple); }
+
+/* 热度 (☆ 数字): 描述的附注, 单独一列没必要 */
+.pg-mp-pop { display: inline-flex; align-items: center; gap: 3px; font-size: var(--fs-meta); color: var(--text-muted); }
+.pg-mp-pop svg { width: 10px; height: 10px; }
+
+/* 空态 / 提示条 */
+.pg-mp-err {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px var(--card-pad);
+  font-size: var(--fs-body);
+  color: var(--red);
+  background: var(--red-glow);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+}
+.pg-mp-msg {
+  padding: 8px var(--card-pad);
+  font-size: var(--fs-meta);
+  color: var(--text-muted);
+}
+.pg-mp-hint { padding-top: 8px; font-size: var(--fs-meta); color: var(--text-muted); }
+
+/* ── 预览 / 表单弹窗 ──────────────────────────────────────────── */
+/* 第 147 批: 这一段以前跟工具集的行式卡片写在一起 (换卡片画法时被一起删掉了),
+   结果预览弹窗的头部/尾部悄悄变了样 (标题字号、来源那行、按钮行的间距)。
+   ⇒ 单独成块, 归到设计系统的零件上。 */
+.pg-mp-prev-head { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.pg-mp-prev-emoji { display: inline-flex; flex: none; color: var(--text-dim); }
+.pg-mp-prev-meta { flex: 1; min-width: 0; }
+.pg-mp-prev-meta h3 { margin: 0; font-size: var(--fs-title); font-weight: 600; }
+.pg-mp-prev-line {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  margin: 4px 0 0; font-size: var(--fs-meta); color: var(--text-muted);
+}
+.pg-mp-real {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 2px 7px;
+  border: 1px solid var(--green); border-radius: var(--r-xs); color: var(--green);
+}
+.pg-mp-real > svg { flex: none; }
+.pg-mp-prev-desc { font-size: var(--fs-body); line-height: 1.7; margin-bottom: 16px; }
+.pg-mp-prev-label { margin-bottom: 8px; }
+.pg-mp-prev-foot { display: flex; gap: 8px; margin-top: 16px; }
+.pg-mp-prev-foot .pg-btn { flex: 1; justify-content: center; }
+
+.pg-form { display: flex; flex-direction: column; gap: 12px; }
+.pg-form-row { display: flex; flex-direction: column; gap: 6px; }
+.pg-mp-modal-btns { margin-top: 12px; }
+.pg-mp-mt { margin-top: 8px; }
+
+/* 外部服务 tab 的宿主容器 (MCP 面板由 settings/mcp.mjs 渲染) */
+.pg-mp-mcp { flex: 1; min-height: 0; }
+
+/* ── 历史档案 (History) ────────────────────────────────────────── */
+/* 第 170 批 · 统一语法: 历史档案页的左栏改成**分类竖列** (.pg-catnav),
+   跟设置页的分类列、工具集的筛选是同一套语言; 章节索引改成统一清单行。
+   页面不再自造 .pangu-subnav / .pg-hist-tree / .pg-hist-sec 三套画法。 */
+.pangu-subshell-history { height: 100%; flex-direction: row; }
+.pangu-subshell-body-plain { padding: 24px; }
+.pg-hist-rail {
+  flex: none;
+  width: 232px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  padding: var(--sp-4) var(--sp-3);
+  border-right: 1px solid var(--hairline);
+  overflow-y: auto;
+}
+/* 第 170 批: 窄屏的分类下拉 (桌面端隐藏)。跟设置页同一套做法 ——
+   契约 §10「左侧分类列 → 顶部下拉」。 */
+.pg-hist-cat-select { display: none; }
+.pg-hist-del {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px;
+  margin-left: var(--sp-1);
+  border: 0; border-radius: var(--r-xs);
+  background: transparent; color: var(--text-muted);
+  cursor: pointer; flex: none;
+  transition: color var(--dur-fast) ease, background var(--dur-fast) ease;
+}
+.pg-hist-del:hover { color: var(--red); background: var(--red-glow); }
+.pg-hist-foot { margin-top: auto; padding: var(--sp-3) var(--sp-2) 0; border-top: 1px solid var(--hairline); }
+.pg-hist-path { font-size: var(--fs-meta); color: var(--foreground); opacity: .8; word-break: break-all; }
+/* 展开的章节正文挂在清单行下面 ⇒ 行要能换行, 正文占满一行 */
+.pg-list-row:has(.pg-hist-sec-body) { flex-wrap: wrap; }
+.pg-hist-sec-body { width: 100%; background: var(--surface); }
+.pg-hist-sec-body .pg-pre { border: 0; border-bottom: 1px solid var(--border); border-radius: 0; }
+.pg-hist-sub { border-bottom: 1px solid var(--border); }
+.pg-hist-sub summary {
+  display: flex; align-items: center;
+  padding: 4px 24px;
+  font-size: var(--fs-meta); cursor: pointer; list-style: none;
+}
+.pg-hist-sub summary:hover { background: var(--surface-hover); }
+.pg-hist-sub-body { border: 0; border-top: 1px solid var(--border); }
+.pg-hist-turns { display: flex; flex-direction: column; gap: 6px; }
+.pg-hist-turn { padding: 10px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); }
+.pg-hist-turn.is-user { background: var(--primary-glow); border-color: var(--primary); }
+.pg-hist-turn-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; font-size: var(--fs-meta); }
+.pg-hist-turn-who { display: inline-flex; align-items: center; gap: 4px; font-weight: 600; letter-spacing: var(--ls-normal); }
+.pg-hist-turn-who svg { width: 12px; height: 12px; }
+.pg-hist-turn.is-user .pg-hist-turn-who { color: var(--primary); }
+.pg-hist-turn-text { font-size: var(--fs-body); line-height: 1.7; white-space: pre-wrap; max-height: 132px; overflow-y: auto; }
+
+/* 第 146 批: 梅花页的样式**唯一真源是 views/meihua.css**。
+   下面这几条是第 144 批重做前的旧版, 留着就是「改一处不生效」的陷阱:
+     .pg-mh-input / .pg-mh-btns        —— 新版 mjs 里已经不用这两个类
+     .pg-mh-card.is-accent            —— 新版用 is-primary / is-secondary
+     .pg-mh-yao-bar.is-moving         —— 新版把 is-moving 挂在 .pg-mh-yao 上
+     .pg-mh-yao-moving                —— 新版改用 .pg-mh-yao-dot
+   真正还活着的 .pg-mh-moving 已合并进 meihua.css。 */
+/* ── 侧栏会话列表 (SessionSidebar) ────────────────────────────── */
+.pg-sessions { margin: 8px; }
+.pg-sessions-toggle { width: 100%; }
+/* 这块住在侧栏里 ⇒ 走**侧栏令牌**。通用 .pg-side-item 用的是正文令牌
+   (--text-dim / --surface-hover), 在侧栏底色上偏灰, 跟上面一排导航项不是一个系统。 */
+.pangu-nav-context .pg-side-item {
+  gap: 10px;
+  padding: 7px 10px;
+  color: var(--side-fg);
+  border-radius: var(--r-sm);
+}
+.pangu-nav-context .pg-side-item:hover { background: var(--side-hover); color: var(--side-hover-fg); }
+.pangu-nav-context .pg-sessions-count {
+  color: var(--side-muted);
+  background: var(--side-chip-bg);
+  border: 1px solid var(--side-chip-border);
+}
+.pg-sessions-caret { display: inline-flex; }
+.pg-sessions-caret svg { width: 15px; height: 15px; }
+.pg-sessions-ico { display: inline-flex; }
+.pg-sessions-ico svg { width: 15px; height: 15px; }
+.pg-sessions-label { flex: 1; text-align: left; font-size: var(--fs-meta); }
+.pg-sessions-count {
+  padding: 1px 6px; font-size: var(--fs-meta);
+  color: var(--text-muted);
+  background: var(--surface-hover);
+  border-radius: var(--r-xs);
+}
+.pg-sessions-list {
+  display: none;
+  max-height: 320px; overflow-y: auto;
+  margin: 4px 0 4px 8px;
+  padding-left: 8px;
+  border-left: 1px solid var(--border);
+}
+.pg-sessions.is-open .pg-sessions-list { display: block; }
+.pg-sessions-hint { padding: 4px 8px; font-size: var(--fs-meta); color: var(--text-muted); }
+.pg-sessions-hint.is-empty { font-style: italic; }
+.pg-sessions-err { padding: 4px 8px; font-size: var(--fs-meta); color: var(--red); }
+.pg-sessions-item {
+  display: flex; align-items: flex-start; gap: 6px;
+  padding: 6px 8px;
+  border-left: 2px solid transparent;
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  cursor: pointer;
+  transition: background-color 200ms ease;
+}
+.pg-sessions-item:hover { background: var(--surface-hover); }
+.pg-sessions-item.is-active { background: var(--primary-glow); border-left-color: var(--primary); }
+.pg-sessions-dot { margin-top: 5px; width: 6px; height: 6px; flex: none; border-radius: 50%; background: var(--text-muted); opacity: .5; }
+.pg-sessions-item:hover .pg-sessions-dot { background: var(--primary); opacity: .8; }
+.pg-sessions-body { flex: 1; min-width: 0; }
+.pg-sessions-title {
+  font-size: var(--fs-meta); font-weight: 500;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.pg-sessions-meta { font-size: var(--fs-meta); color: var(--text-muted); }
+.pg-sessions-del {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; flex: none;
+  border: 0; border-radius: var(--r-xs);
+  background: transparent; color: var(--red);
+  cursor: pointer; opacity: 0;
+  transition: opacity 200ms ease;
+}
+.pg-sessions-item:hover .pg-sessions-del { opacity: 1; }
+
+/* ── 工具调用卡 (ToolCall) ────────────────────────────────────── */
+.pg-toolcall {
+  border: 1px solid; border-radius: var(--r-xs);
+  margin: 6px 0; overflow: hidden;
+  font-size: var(--fs-body);
+}
+.pg-toolcall[data-status="in_progress"],
+.pg-toolcall[data-status="started"] {
+  --tc-color: var(--primary); --tc-bg: var(--primary-glow);
+}
+.pg-toolcall[data-status="blocked"] {
+  --tc-color: var(--accent); --tc-bg: var(--accent-glow);
+}
+.pg-toolcall[data-status="failed"] {
+  --tc-color: var(--red); --tc-bg: var(--red-glow);
+}
+.pg-toolcall[data-status="completed"] {
+  --tc-color: var(--green); --tc-bg: var(--green-glow);
+}
+.pg-toolcall { border-color: var(--tc-color, var(--border)); background: var(--tc-bg, transparent); }
+.pg-toolcall-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 10px;
+  font-size: var(--fs-meta); font-weight: 600;
+  color: var(--tc-color, var(--text-dim));
+  border-bottom: 1px solid var(--border-light);
+}
+.pg-toolcall-title { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
+.pg-toolcall-title svg { flex: none; }
+.pg-toolcall-title span {
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-family: var(--font-mono); font-size: var(--fs-meta); font-weight: 500;
+}
+.pg-toolcall-right { display: inline-flex; align-items: center; gap: 6px; }
+.pg-toolcall-dur { font-size: var(--fs-meta); opacity: .7; }
+.pg-toolcall-chip {
+  padding: 1px 6px; font-size: var(--fs-meta); border-radius: var(--r-xs);
+  color: var(--primary-foreground);
+  background: var(--tc-color, var(--text-muted));
+}
+.pg-toolcall-params {
+  margin: 0; padding: 6px 10px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta); color: var(--text-muted);
+  white-space: pre-wrap; word-break: break-all;
+  background: var(--surface);
+}
+.pg-toolcall-err { padding: 4px 10px; font-size: var(--fs-meta); border-top: 1px solid var(--border-light); }
+
+/* ── 将灵表 (第 138 批) ──────────────────────────────────────────
+   原来这张表是**裸表** (没装进卡片), 最后一列直接顶到窗口右边缘:
+   长任务标题被**视口**切掉, 右边一点留白都没有 —— 看着像排版坏了。
+   table-layout:fixed + 列宽按 th 定死 ⇒ 末列拿剩余宽度,
+   省略号落在卡片里, 不在屏幕边上。 */
+
+/* ── 窄屏 ─────────────────────────────────────────────────────── */
+@media (max-width: 720px) {
+  .pg-mp-search { width: 100%; }
+  .pg-hist-turn-text { max-height: none; }
+  /* 第 147 批: 窄屏下两列 (名字 | 描述) 挤不开 ⇒ 折成一行, 描述落到名字下面。
+     行本身还是 .pg-list-row (图标 · 主体 · 动作), 折叠的是**主体内部**。 */
+  .pg-mp-row-main {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 2px;
+  }
+  /* 第 170 批: 历史档案的双栏在窄屏收成上下 (契约 §10)。
+     390 屏上左 rail 232px + 右栏 ~150px ⇒ 读数被压成一列、标题折两行。
+     现在: 左栏收成一个下拉贴在顶部, 右栏整宽铺开。 */
+  .pangu-subshell-history { flex-direction: column; }
+  .pg-hist-rail {
+    width: 100%;
+    flex: none;
+    border-right: 0;
+    border-bottom: 1px solid var(--hairline);
+    padding: var(--sp-3) var(--sp-4);
+    overflow-y: visible;
+  }
+  .pg-hist-rail .pg-catnav,
+  .pg-hist-foot { display: none; }
+  .pg-hist-cat-select { display: block; width: 100%; }
+  .pangu-subshell-body-plain { padding: var(--sp-4); }
+  /* 日志文件名是运维细节, 390 屏上留着会把标题挤没 ⇒ 窄屏收掉
+     (它本来只在 hover 的 title 里也能拿到)。 */
+  .pg-team-log { display: none; }
+}

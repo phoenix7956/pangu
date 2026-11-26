@@ -1,0 +1,48 @@
+{
+  "_meta": {
+    "version": "2026.7.9",
+    "purpose": "工具超时分级 (§0.7 + W6-1 抄 Claude Code)",
+    "note": "每个工具类分到一档超时，按工具的危险性 + I/O 类型"
+  },
+
+  "read": {
+    "name": "快速读",
+    "timeout_ms": 10000,
+    "tools": ["read_file", "list_directory", "file_grep", "file_find", "search_files", "memory_read", "memory_search", "web_search", "web_fetch", "weather_check", "stock_quote", "stock_history", "currency_check", "crypto_price", "news_digest", "system_info", "process_list", "network_check", "http_check", "permission_check"]
+  },
+
+  "write": {
+    "name": "本地写",
+    "timeout_ms": 15000,
+    "tools": ["write_file", "file_edit", "clipboard_read", "clipboard_write", "memory_write", "cache_put", "cache_get", "cache_evict", "cache_stats", "cache_preheat", "send_wechat", "translate_text", "bazi_calc"]
+  },
+
+  "exec": {
+    "name": "Shell 执行",
+    "timeout_ms": 60000,
+    "tools": ["exec_command", "code_execute", "batch_execute", "github_api", "archive_create", "archive_extract", "screenshot"]
+  },
+
+  "network": {
+    "name": "网络长操作",
+    "timeout_ms": 30000,
+    "tools": ["run_installer", "set_env_path", "get_lan_ip", "task_output", "task_done"]
+  },
+
+  "vision": {
+    "name": "Vision 多模态",
+    "timeout_ms": 60000,
+    "tools": ["computer_use_vision_act", "computer_use_drag"]
+  },
+
+  "computer_use": {
+    "name": "UI 操作",
+    "timeout_ms": 30000,
+    "tools": ["computer_use_click", "computer_use_type", "computer_use_key"]
+  },
+
+  "default": {
+    "name": "默认",
+    "timeout_ms": 30000
+  }
+}

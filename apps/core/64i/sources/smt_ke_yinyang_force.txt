@@ -1,0 +1,17 @@
+# ===== PROVENANCE SLICE =====
+# source_id: smt_ke_yinyang_force
+# tier: classic
+# origin: <course-source>/<course-file>
+# lines: 3822-3827
+# sliced_at: 2026-10-22
+# extractor: apps/core/scripts/extract_provenance_sources.js
+# note: 《三命通会》论克分正偏: 辛克甲/庚克乙…是阴克阳阳克阴, 乃阴阳配合之理; 故甲见辛为正官, 见庚为偏官。
+# 规则: 正文为原文件 3822-3827 行的**逐字拷贝**, 一字未改。
+#      头部为抽取器生成, 与原文无关。
+# ===== /PROVENANCE SLICE =====
+庚煞，而甲始得安其身；不喜食丁，以丁能伤官，而甲不得成其材。以其义也。克我、
+
+           资
+我克，如辛克甲，庚克乙，甲克己，乙克戊，是阴克阳，阳克阴，阴匹阳，阳匹阴，乃
+阴阳配合之理。故甲见辛为正官，见庚为偏官。官喜正，不喜偏，掌印佐贰，职有不同。
+        内

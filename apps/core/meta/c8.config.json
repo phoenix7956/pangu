@@ -1,0 +1,17 @@
+{
+  "all": true,
+  "include": ["pangu-single.js", "modules/**/*.js", "64i/**/*.js", "modules/**/*.cjs", "modules/**/*.mjs"],
+  "exclude": [
+    "tests/**",
+    "node_modules/**",
+    "**/*.bak",
+    "**/*.tmp",
+    "docs/**",
+    "scripts/**",
+    "coverage/**"
+  ],
+  "reporter": ["text", "html", "json-summary"],
+  "reports-dir": "./coverage",
+  "check-coverage": false,
+  "skip-full": false
+}

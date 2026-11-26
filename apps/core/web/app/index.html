@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>盘古 · 易学推演工作台</title>
+<!-- 第 141 批: 资源一律**相对** —— 不带前导斜杠。
+     浏览器按「当前文档基址」解析 ⇒ 盘古挂在 /pangu/ 这种子路径下也照样跑。
+     （不许改成 /app/xxx —— 那是写死基址, 一换前缀就全丢。）-->
+<link rel="stylesheet" href="themes.css">
+<!-- 第 147 批: 设计系统基础层 (零件的唯一真源) —— 必须在 components.css 之前,
+     否则同名类的旧定义会盖住它 (同优先级后加载的赢)。 -->
+<link rel="stylesheet" href="design-system.css">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="components.css">
+<link rel="stylesheet" href="settings.css">
+<link rel="stylesheet" href="views.css">
+<link rel="stylesheet" href="views/hexagrams.css">
+<link rel="stylesheet" href="views/evolution.css">
+<link rel="stylesheet" href="views/bazi.css">
+<script>
+  // 原版 UI 就是这么做的: 样式加载前同步定主题, 防闪白 (index.html 里那段脚本的原样搬运)
+  //
+  // 第 149 批: 墨盘成了默认主题。老浏览器 localStorage 里还躺着 'light'
+  //   (旧默认) —— 不迁的话老板打开页面看到的还是**旧主题**, 改了半天他没看见。
+  //   所以给主题存档加一个版本号: 没有版本号 = 旧时代的存档 ⇒ 迁到新默认,
+  //   并把版本号写上 (写上之后就不再迁, 用户自己选的主题不会被覆盖)。
+  (function () {
+    try {
+      var t = localStorage.getItem('pangu.ui.theme');
+      var ver = localStorage.getItem('pangu.ui.theme.ver');
+      if (!ver) {
+        t = 'dark';
+        localStorage.setItem('pangu.ui.theme', 'dark');
+        localStorage.setItem('pangu.ui.theme.ver', '166');
+      }
+      if (!t) t = 'dark';
+      document.documentElement.setAttribute('data-theme', t);
+    } catch (e) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  })();
+</script>
+</head>
+<body>
+
+<div class="pangu-app">
+
+  <aside class="pangu-sidebar" id="sidebar">
+    <div class="pangu-brand">
+      <a class="pangu-brand-home" href="./" aria-label="盘古工作台">
+        <span class="pangu-brand-mark" aria-hidden="true">
+          <!-- 第 142 批: 以前是「三长三短六根横条」—— 远看就是**汉堡菜单**,
+               跟顶栏那个真·菜单键撞脸, 侧栏 logo 反而像按钮。
+               现在画成真正的**六爻**: 阳爻一整条, 阴爻断成两截 (中间留白),
+               中爻用朱砂 —— 一眼是卦, 不是菜单。 -->
+          <i></i><i class="is-split"></i><i class="is-mid"></i>
+          <i class="is-split"></i><i></i><i class="is-split"></i>
+        </span>
+        <span class="pangu-brand-copy"><strong>盘古</strong><small>易学推演工作台</small></span>
+      </a>
+      <button type="button" class="pangu-sidebar-close" id="nav-close" aria-label="关闭导航">
+        <i data-ico="x"></i>
+      </button>
+    </div>
+
+    <nav class="pangu-nav" id="nav" aria-label="主导航">
+      <!-- 第 159 批 (重构): 侧栏从四组平铺收成两组 —— 工作 (你交的事) / 推演 (易学)
+           + 系统 (状态/历史/设置沉底), 中间一根发丝线分界。
+           以前四组 (工作空间/易学推演/资料与扩展/运行态) 各占一行标题, 侧栏
+           一屏 8 个标题 + 9 个入口, 密度跟内容区 (一条流) 不匹配, 像后台导航。 -->
+      <div class="pangu-nav-group">
+        <span class="pangu-nav-heading">工作</span>
+        <a class="pangu-nav-item" data-view="chat" href="./"><i data-ico="message"></i><span class="pangu-nav-label">工作台</span></a>
+        <a class="pangu-nav-item" data-view="team" href="team"><i data-ico="workflow"></i><span class="pangu-nav-label">自动化</span></a>
+        <a class="pangu-nav-item" data-view="marketplace" href="marketplace"><i data-ico="bot"></i><span class="pangu-nav-label">工具集</span></a>
+      </div>
+      <div class="pangu-nav-group pangu-nav-group-spaced">
+        <span class="pangu-nav-heading">易学推演</span>
+        <a class="pangu-nav-item" data-view="bazi" href="bazi"><i data-ico="activity"></i><span class="pangu-nav-label">八字排盘</span></a>
+        <a class="pangu-nav-item" data-view="hexagrams" href="hexagrams"><i data-ico="book"></i><span class="pangu-nav-label">六十四卦</span></a>
+        <a class="pangu-nav-item" data-view="subagents" href="subagents"><i data-ico="users"></i><span class="pangu-nav-label">将灵</span></a>
+      </div>
+      <!-- 原版: 最近会话 (SessionSidebar) 只在主对话页展开 -->
+      <div class="pangu-nav-context" id="nav-sessions" hidden></div>
+    </nav>
+
+    <div class="pangu-sidebar-bottom">
+      <!-- 第 159 批: 状态 / 历史 / 设置收进侧栏底「系统」区 —— 主导航只留
+           工作 + 推演两组, 底区是机器自身的状态, 语义分开。 -->
+      <div class="pangu-nav-group pangu-nav-sysgroup">
+        <span class="pangu-nav-heading">系统</span>
+        <a class="pangu-nav-item" data-view="status" href="status"><i data-ico="gauge"></i><span class="pangu-nav-label">状态</span></a>
+        <!-- 第 176 批: 进化 (自进化账本) —— 归「系统」区, 跟状态/历史一档:
+             它讲的是机器自己跑得怎么样, 不是推演, 所以不混进易学那组。 -->
+        <a class="pangu-nav-item" data-view="evolution" href="evolution"><i data-ico="trending-up"></i><span class="pangu-nav-label">进化</span></a>
+        <a class="pangu-nav-item" data-view="history" href="history"><i data-ico="archive"></i><span class="pangu-nav-label">历史档案</span></a>
+      </div>
+      <span class="pangu-sidebar-node"><span class="pangu-node-pulse"></span>本地节点</span>
+      <a class="pangu-nav-item" data-view="settings" href="settings"><i data-ico="settings"></i><span class="pangu-nav-label">系统设置</span></a>
+    </div>
+  </aside>
+
+  <button class="pangu-nav-scrim" id="nav-scrim" aria-label="关闭导航"></button>
+
+  <div class="pangu-main">
+    <header class="pangu-topbar">
+      <button class="pangu-mobile-menu pg-icon-btn" id="nav-open" aria-label="打开导航">
+        <i data-ico="menu"></i>
+      </button>
+      <div class="pangu-topbar-text">
+        <div class="pangu-page-kicker" id="kicker">盘古 <span>/</span> 工作空间</div>
+        <!-- 第 143 批: 页面说明搬进顶栏, 跟在标题后面 (原来它孤零零浮在正文上方) -->
+        <div class="pangu-topbar-title"><span id="view-title">工作台</span><span class="pangu-topbar-sub" id="view-sub"></span></div>
+      </div>
+      <div class="pangu-health pangu-health-loading" id="health" aria-live="polite">
+        <span class="pangu-health-dot"></span><span id="health-text">正在连接</span><span class="pangu-health-mode" id="health-mode"></span>
+      </div>
+      <span class="pangu-topbar-div" aria-hidden="true"></span>
+      <button class="pg-icon-btn" id="theme-btn" title="主题：浅色" aria-label="切换主题">
+        <i data-ico="sun"></i>
+      </button>
+      <button class="pg-icon-btn" id="refresh-btn" title="刷新连接状态" aria-label="刷新连接状态">
+        <i data-ico="refresh"></i>
+      </button>
+      <button class="pangu-command-trigger" id="palette-btn" aria-label="打开命令面板">
+        <i data-ico="search"></i><span>快速跳转</span><kbd>⌘ K</kbd>
+      </button>
+    </header>
+
+    <main class="pangu-content" id="main"></main>
+  </div>
+
+  <!-- 令符: 原版的 ⌘K 命令面板 -->
+  <div class="pangu-palette" id="palette" hidden>
+    <div class="pangu-palette-box" role="dialog" aria-label="令符">
+      <div class="pangu-palette-head">
+        <i data-ico="search"></i>
+        <input type="text" id="palette-input" placeholder="令符 —— 输名字跳过去 (回车执行)" autocomplete="off">
+        <kbd>ESC</kbd>
+      </div>
+      <div class="pangu-palette-list" id="palette-list"></div>
+    </div>
+  </div>
+
+</div>
+
+<script type="module" src="app.mjs"></script>
+</body>
+</html>

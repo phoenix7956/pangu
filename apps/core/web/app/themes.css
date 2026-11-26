@@ -1,0 +1,696 @@
+/* themes.css —— 盘古工作台 · 令牌层 (第 166 批 · 整套重写)
+ *
+ * ── 这一版的立场 ──────────────────────────────────────────────
+ * 前面 165 批一直在「加」: 加令牌、加零件、加修饰。令牌越加越多,
+ * 颜色从 2 个长到 20 个, 圆角从 1 档长到 5 档, 于是每个页面都长得
+ * 不一样, 老板看着像拼的。
+ *
+ * 这一版反过来: **令牌只留一套, 三套主题只换值**。
+ *   · 颜色  —— 每套主题只有一个交互色 (primary) + 一个注意色 (accent)
+ *               + 一个身份色 (text-gold)。五行色是身份, 不参与交互。
+ *   · 形状  —— 圆角 4 档 (4 / 6 / 8 / 12) + pill。跟主流 agent (Vercel
+ *               8-12 / Linear 6-10 / Cursor 8) 对齐。
+ *   · 间距  —— 8px 网格, 4 的倍数, 只有 7 档。
+ *   · 字号  —— 6 档, 每档的角色写死, 页面不许自己发明新号。
+ *
+ * ── 三套主题 ──────────────────────────────────────────────────
+ *   dark  墨枢 (默认)  近黑中性 + 玉青交互色 + 铜金身份字
+ *   light 纸白         纯白画布 + 深玉青 + 灰阶发丝线
+ *   gold  铜夜         暖墨画布 + 铜金交互色 (夜谈/香案)
+ *
+ * ── 三条铁律 ──────────────────────────────────────────────────
+ *   ① 五行色 (--wood/--fire/--earth/--metal/--water) 是老板 10-27 亲手
+ *      用取色器在课件正文上采的原值, **一个字都不许改**, 且三套主题同值
+ *      —— 五行身份不随主题漂。所以它们只写在 :root 一处。
+ *   ② 底色档 (--muted) 和文字档 (--muted-foreground) 必须是两个值。
+ *   ③ 阴影只给浮层 (弹窗 / 命令面板 / 抽屉)。贴地的东西靠明度差分层。
+ */
+
+/* ── 主题无关: 字体 / 字距 / 字号 / 间距 / 圆角 / 动效 ───────────── */
+:root {
+  /* ── 字体: 两个中文字 + 一个技术字 (第 169 批重定角色) ──────────
+     **宋体 (Songti SC) 从此不出场。** 它薄、旧气, 而且它一出现就意味着
+     「同一个格子里摆着两种中文字体」—— 老板 10-30 连说三遍「我说的字体」
+     说的就是这个: 不是字重、不是字号, 是**字族本身选错了**。
+
+     ① 界面字 --font-ui (苹方): 一切界面字、标签、**卦名**、干支、数字、表格。
+        名字是**标签**, 不是文章 —— 用界面字 + 600 字重立住, 不靠换字体。
+     ② 经文字 --font-script (楷体): 只出现在**盘古说话的地方** ——
+        成段经文 (卦辞/象辞/爻辞正文) 和盘古自己的名字 (侧栏品牌 / 首屏大字)。
+        楷体 (Kaiti SC) 实测覆盖 64i 全语料 922 个汉字, **零回退** ——
+        不会出现「一行里两个字体」的混排。
+     ③ 技术字 --font-mono: 代码 / 路径 / 参数 / 命令。
+     **不许有第四个角色。** */
+  --font-ui:    -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC",
+                "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
+  --font-script: "Kaiti SC", "STKaiti", "KaiTi", "楷体", "Songti SC",
+                "Noto Serif CJK SC", serif;
+  --font-mono:  ui-monospace, SFMono-Regular, Menlo, Monaco, "SF Mono", monospace;
+
+  /* ── 字距: 只有两档 ────────────────────────────────────────
+     中文是满格字, 拉字距会把字撑散 —— 这是英文模板抄来的毛病。
+     --ls-normal 恒为 0; --ls-label 只给极短的小标签, 且只 0.02em。 */
+  --ls-normal: 0;
+  --ls-label:  .02em;
+
+  /* ── 全局字号倍率 (设置页「界面 → 字号」滑块靠它) ──────────────
+     字号令牌一律 = 基准 px × 倍率。滑块拖到哪, 全站一起缩, 层级差不变。 */
+  --ui-scale: 1;
+
+  /* ── 字号阶梯: 四档, 角色写死 (第 167 批) ──────────────────────
+       --fs-display  26  页面唯一的大标题 (首屏一句话 / 卦符)
+       --fs-title    18  页面标题、卡片/区块标题、磁贴数值
+       --fs-body     14  正文 (全站唯一的正文字号)
+       --fs-meta     12  次要说明、表头、徽章、药丸
+     为什么砍到四档: 上一版是六档 (30/21/17/14/12/11) + 两个阶梯外
+     的图标档 (20/26) = 全站并存**八个**尺寸, 老板看着就是"乱"。
+     而 11 与 12 只差 1px —— 肉眼分不出, 代码里却是两档;
+     21 与 17、20 与 17 同理, 是**同层微差**被写成了不同档。
+     现在四档, 每屏肉眼能看见的最多三个尺寸:
+       标题 18 / 正文 14 / 次要 12 —— 大标题 26 全站只出现在首屏一处。
+     主次相邻差 ≥ 4px, 总跨度 14px —— 层级拉得开, 但没有一档大到喊。
+     中文大标题满格, 再往上顶就是"笨"。 */
+  --fs-display: calc(26px * var(--ui-scale));
+  --fs-title:   calc(18px * var(--ui-scale));
+  --fs-body:    calc(14px * var(--ui-scale));
+  --fs-meta:    calc(12px * var(--ui-scale));
+
+  /* ── 间距: 8px 网格, 只有 7 档 ───────────────────────────────
+     以前 padding 散着 6/8/10/12/14/16/20/24 八档, 页面之间没有共同的
+     呼吸节奏 ⇒ 看着乱。现在只有 4 的倍数。 */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+
+  /* ── 圆角: 4 档 + pill ────────────────────────────────────────
+     页面 12 / 卡片 8 / 控件 6 / 徽章 4。层级化, 不许一刀切 8px。 */
+  --r-xs: 4px;
+  --r-sm: 6px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --r-pill: 999px;
+
+  /* ── 卡片内边距: 两档 (常规 / 窄屏) ────────────────────────── */
+  --card-pad: 18px;
+  --card-pad-sm: 14px;
+
+  /* ── 内容竖轨 ────────────────────────────────────────────────
+     主流 agent 的内容区是**贴着画布铺开**的, 不是一条窄带 ——
+     1440 屏上留一条 880px 的窄轨, 右边空一大块, 一眼"没做完"。
+     正文轨 1040 / 表格网格轨 1320。 */
+  --col: 1040px;
+  --col-wide: 1320px;
+  --content-pad: 24px;
+
+  /* ── 发丝线: 分区用, 不跟卡片描边 (--border) 混 ──────────────
+     第 147~165 批的界面是「处处是卡片」: 每个区块一个框, 框里套框。
+     主流 agent 相反 —— **卡片退场, 发丝线上场** (Linear / Cursor)。 */
+  --hairline: rgba(0, 0, 0, .10);
+
+  /* 壳的玻璃底 (侧栏/顶栏) —— 壳浮在画布上, 不是画布的一部分 */
+  --chrome-bg: rgba(255, 255, 255, .78);
+  --side-bg-glass: rgba(240, 240, 237, .76);
+
+  /* 动效: 只动 opacity / transform, 统一时长 */
+  --dur-fast: 110ms;
+  --dur: 180ms;
+  --ease: cubic-bezier(.25, 1, .5, 1);
+
+  /* ── 五行色: 老板亲手采的原值, 三套主题同值 ───────────────────
+     只写在 :root 一处 (三套主题共享), 免得三份拷贝慢慢走样。
+       --xxx      色块底色 (老板原值)
+       --xxx-ink  文字档 (同原值, 写在做五行字的卡底上)
+       --on-xxx   写在这个色块上的字色
+     高饱和 ⇒ 只能当色块/字色, 绝不当底色铺大面积。 */
+  --wood: #00FF1D;
+  --wood-ink: #00FF1D;
+  --on-wood: #0A0A0A;
+  --wood-glow: rgba(0, 255, 29, .14);
+  --fire: #FF0000;
+  --fire-ink: #FF0000;
+  --on-fire: #0A0A0A;
+  --fire-glow: rgba(255, 0, 0, .14);
+  --earth: #B28C21;
+  --earth-ink: #B28C21;
+  --on-earth: #0A0A0A;
+  --earth-glow: rgba(178, 140, 33, .14);
+  --metal: #FFEE00;
+  --metal-ink: #FFEE00;
+  --on-metal: #0A0A0A;
+  --metal-glow: rgba(255, 238, 0, .14);
+  --water: #0E70F2;
+  --water-ink: #0E70F2;
+  --on-water: #FFFFFF;
+  --water-glow: rgba(14, 112, 242, .14);
+
+  /* ── 来源色 (第 170 批): 技能来源的身份色 ─────────────────────
+     以前这四个色值**硬编码在页面 CSS 里** (views.css) —— 颜色属于
+     令牌层的事, 页面层不该自己藏色值。现在提到令牌层, 三套主题同值
+     (来源身份不随主题漂)。 */
+  --src-claude: #A15C2B;
+  --src-skillhub: #2A6BC4;
+  --src-clawhub: #C0453C;
+  --src-github: #6B7280;
+}
+
+/* ══ 墨枢 (默认, 深色) ══════════════════════════════════════════ */
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* ── 表面四档: 画布 → 卡 → 卡+ → 浮层, 每档明度差 2~3% ─────── */
+  --background:    #0A0B0C;
+  --card:          #111214;
+  --card-raise:    #15171A;
+  --card-elevated: #1A1D20;
+  --surface:       #202428;
+  --surface-hover: #262A2F;
+  --bg-elevated:   var(--card-elevated);
+  --bg-hover:      var(--surface-hover);
+  --chrome:        var(--card);
+  --overlay:       #1A1D20;
+
+  /* ── 描边三档: 一律半透明白 (Linear 的做法: 边框永远是半透明白) ── */
+  --border:       rgba(255, 255, 255, .085);
+  --border-light: rgba(255, 255, 255, .05);
+  --border-hover: rgba(255, 255, 255, .17);
+  --input:        #0E0F11;
+  --hairline:     rgba(255, 255, 255, .07);
+
+  /* ── 壳 ──────────────────────────────────────────────────── */
+  --chrome-bg:     rgba(17, 18, 20, .74);
+  --side-bg-glass: rgba(13, 14, 15, .74);
+
+  /* ── 侧栏 ────────────────────────────────────────────────── */
+  --side-bg:         #0E0F10;
+  --side-fg:         #C7CBCE;
+  --side-strong:     #FFFFFF;
+  --side-heading:    #6B7176;
+  --side-muted:      #767C82;
+  --side-border:     rgba(255, 255, 255, .06);
+  --side-hover:      rgba(255, 255, 255, .055);
+  --side-hover-fg:   #FFFFFF;
+  --side-active-bg:  rgba(93, 221, 184, .12);
+  --side-active-fg:  #7FE9C8;
+  --side-accent:     #5DDDB8;
+  --side-chip-bg:    rgba(255, 255, 255, .05);
+  --side-chip-border:rgba(255, 255, 255, .10);
+  --side-scrim:      rgba(4, 5, 6, .62);
+
+  /* ── 墨四档 ──────────────────────────────────────────────── */
+  --foreground: #E9EBED;
+  --text:       #D6D9DC;
+  --text-strong:#FFFFFF;
+  --text-dim:   #9AA0A6;
+  --text-muted: #6B7178;
+  --muted:            #1C1F22;
+  --muted-foreground: #838A91;
+  --chat-text:        var(--text);
+
+  /* ── 主强调: 玉青。唯一的交互色 (按钮/选中/链接/焦点) ───────── */
+  --primary:           #5DDDB8;
+  --primary-foreground:#052018;
+  --primary-glow:      rgba(93, 221, 184, .14);
+  --primary-glow-strong: rgba(93, 221, 184, .26);
+
+  /* ── 次强调: 朱砂。只给「要人注意」的东西, 不铺底不当交互 ───── */
+  --accent:           #F0704F;
+  --accent-bright:    #FF8A6B;
+  --accent-dim:       #D45A3C;
+  --accent-hover:     #FF8A6B;
+  --accent-glow:      rgba(240, 112, 79, .14);
+  --accent-glow-strong: rgba(240, 112, 79, .24);
+  --accent-subtle:    rgba(240, 112, 79, .12);
+  --accent-foreground:#1A0904;
+  --text-gold:        #D9B570;
+
+  /* ── 状态 ────────────────────────────────────────────────── */
+  --green:  #5DDDB8;
+  --green-dim: #3FB292;
+  --green-glow: rgba(93, 221, 184, .14);
+  --red:    #F0704F;
+  --red-dim:#C95539;
+  --red-glow: rgba(240, 112, 79, .14);
+  --orange: #E0A15C;
+  --orange-dim: #B87B3C;
+  --orange-glow: rgba(224, 161, 92, .14);
+  --yellow: #D9B570;
+  --ok:   #5DDDB8;
+  --warn: #D9B570;
+  --error:#F0704F;
+  --destructive: #F0704F;
+  --destructive-foreground: #1A0904;
+  --status-connected: #5DDDB8;
+  --status-disconnected: #F0704F;
+  --purple: #A79BE0;
+  --purple-bright: #BDB2EE;
+  --purple-dim: #887CC2;
+  --purple-glow: rgba(167, 155, 224, .14);
+  --purple-glow-strong: rgba(167, 155, 224, .24);
+  --purple-subtle: #211E33;
+
+  /* ── 阴阳 ────────────────────────────────────────────────── */
+  --yang: #ECEEF0;
+  --yin:  #6A7076;
+
+  /* ── 阴影: 只给浮层 ──────────────────────────────────────── */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, .40);
+  --shadow-md: 0 8px 24px -6px rgba(0, 0, 0, .60), 0 2px 6px rgba(0, 0, 0, .40);
+  --shadow-lg: 0 28px 64px -16px rgba(0, 0, 0, .78), 0 8px 20px -8px rgba(0, 0, 0, .50);
+  --shadow-primary: 0 2px 12px rgba(93, 221, 184, .22);
+  --shadow-gold:    0 2px 12px rgba(217, 181, 112, .20);
+  --shadow-purple:  0 2px 12px rgba(167, 155, 224, .20);
+  --focus-glow:      0 0 0 3px rgba(93, 221, 184, .28);
+  --focus-glow-gold: 0 0 0 3px rgba(217, 181, 112, .28);
+
+  --paper-tex: none;
+
+  /* 顶光: 两盏极淡的灯 —— 左上一束冷白, 右下一缕朱砂。
+     让近黑不是纯黑, 画布有"前后"。静态材质光, 不是营销站的彩色渐变。 */
+  --toplight:
+    radial-gradient(1400px 820px at 50% -28%, rgba(255, 255, 255, .055), transparent 70%),
+    radial-gradient(900px 520px at 98% 110%, rgba(240, 112, 79, .035), transparent 64%);
+
+  /* ── 五行色·统一 (2026-11-18 老板拍: 四个 ui 要统一) ─────────────
+     四套主题**同一套五行色**: 金 999 #C99700 / 土 灰棕 #6E5A4A / 木 #0B7A3B /
+     火 #C22A1E / 水 #0E5FD8。覆盖 :root 老板原值 (亮饱和 金 #FFEE00 等) ——
+     原值在浅底上读不清, 且金土同黄相易混; 统一集在深浅底都读得出 (深底对比度
+     金 7.4 / 其余 ≥3.4)。字色 --on-xxx 全白 (中调色块上白字, 深浅底都稳)。
+     这取代了之前「深色走原值 / 浅色走重映射」的两套, 四 ui 五行色一致。 */
+  --wood:      #0B7A3B;
+  --wood-ink:  #0B7A3B;
+  --on-wood:   #FFFFFF;
+  --fire:      #C22A1E;
+  --fire-ink:  #C22A1E;
+  --on-fire:   #FFFFFF;
+  --earth:     #6E5A4A;
+  --earth-ink: #6E5A4A;
+  --on-earth:  #FFFFFF;
+  --metal:     #C99700;
+  --metal-ink: #C99700;
+  --on-metal:  #FFFFFF;
+  --water:     #0E5FD8;
+  --water-ink: #0E5FD8;
+  --on-water:  #FFFFFF;
+}
+
+/* ══ 纸白 (浅色) ════════════════════════════════════════════════ */
+[data-theme="light"] {
+  color-scheme: light;
+
+  --background:    #F6F6F4;
+  --card:          #FFFFFF;
+  --card-raise:    #FCFCFB;
+  --card-elevated: #F3F3F0;
+  --surface:       #ECECE8;
+  --surface-hover: #E3E3DE;
+  --bg-elevated:   var(--card-elevated);
+  --bg-hover:      var(--surface-hover);
+  --chrome:        var(--card);
+  --overlay:       #FFFFFF;
+
+  --border:       #E3E3DE;
+  --border-light: #EDEDEA;
+  --border-hover: #CBCBC4;
+  --input:        #FFFFFF;
+  --hairline:     rgba(20, 22, 20, .09);
+
+  --chrome-bg:     rgba(255, 255, 255, .80);
+  --side-bg-glass: rgba(238, 238, 234, .78);
+
+  --side-bg:         #EDEDEA;
+  --side-fg:         #3A3D40;
+  --side-strong:     #141618;
+  --side-heading:    #878C91;
+  --side-muted:      #8B9096;
+  --side-border:     #E0E0DA;
+  --side-hover:      rgba(20, 22, 20, .05);
+  --side-hover-fg:   #141618;
+  --side-active-bg:  rgba(14, 138, 105, .10);
+  --side-active-fg:  #0B6B52;
+  --side-accent:     #0E8A69;
+  --side-chip-bg:    #FFFFFF;
+  --side-chip-border:rgba(20, 22, 20, .10);
+  --side-scrim:      rgba(24, 25, 20, .34);
+
+  --foreground: #1A1C1E;
+  --text:       #26282B;
+  --text-strong:#0E1012;
+  --text-dim:   #5C6167;
+  --text-muted: #868B91;
+  --muted:            #EFEFEC;
+  --muted-foreground: #6E7379;
+  --chat-text:        var(--text);
+
+  --primary:           #0E8A69;
+  --primary-foreground:#FFFFFF;
+  --primary-glow:      rgba(14, 138, 105, .10);
+  --primary-glow-strong: rgba(14, 138, 105, .18);
+
+  --accent:           #C2410C;
+  --accent-bright:    #9A3412;
+  --accent-dim:       #A03A10;
+  --accent-hover:     #9A3412;
+  --accent-glow:      rgba(194, 65, 12, .10);
+  --accent-glow-strong: rgba(194, 65, 12, .16);
+  --accent-subtle:    rgba(194, 65, 12, .08);
+  --accent-foreground:#FFFFFF;
+  --text-gold:        #8A6A24;
+
+  --green:  #0E8A69;
+  --green-dim: #0B6B52;
+  --green-glow: rgba(14, 138, 105, .10);
+  --red:    #C2410C;
+  --red-dim:#9A3412;
+  --red-glow: rgba(194, 65, 12, .10);
+  --orange: #A75A15;
+  --orange-dim: #85470F;
+  --orange-glow: rgba(167, 90, 21, .10);
+  --yellow: #8A6A24;
+  --ok:   #0E8A69;
+  --warn: #8A6A24;
+  --error:#C2410C;
+  --destructive: #C2410C;
+  --destructive-foreground: #FFFFFF;
+  --status-connected: #0E8A69;
+  --status-disconnected: #C2410C;
+  --purple: #6D5BA8;
+  --purple-bright: #8069C0;
+  --purple-dim: #584780;
+  --purple-glow: rgba(109, 91, 168, .10);
+  --purple-glow-strong: rgba(109, 91, 168, .16);
+  --purple-subtle: #EFEBF7;
+
+  --yang: #17191B;
+  --yin:  #A2A79C;
+
+  --shadow-sm: 0 1px 2px rgba(24, 26, 20, .05), 0 1px 1px rgba(24, 26, 20, .03);
+  --shadow-md: 0 6px 18px -6px rgba(24, 26, 20, .12), 0 1px 3px rgba(24, 26, 20, .05);
+  --shadow-lg: 0 22px 48px -14px rgba(24, 26, 20, .22), 0 6px 14px -8px rgba(24, 26, 20, .10);
+  --shadow-primary: 0 2px 10px rgba(14, 138, 105, .18);
+  --shadow-gold:    0 2px 10px rgba(138, 106, 36, .16);
+  --shadow-purple:  0 2px 10px rgba(109, 91, 168, .16);
+  --focus-glow:      0 0 0 3px rgba(14, 138, 105, .18);
+  --focus-glow-gold: 0 0 0 3px rgba(138, 106, 36, .18);
+
+  --paper-tex: none;
+  --toplight:
+    radial-gradient(1400px 820px at 50% -28%, rgba(255, 255, 255, .80), transparent 68%),
+    radial-gradient(900px 520px at 98% 108%, rgba(194, 65, 12, .030), transparent 62%);
+
+  /* ── 五行色·浅色重映射 (2026-11-18) ──────────────────────────
+     :root 的五行原值 (木 #00FF1D / 金 #FFEE00 / 火 #FF0000 …) 是老板
+     10-27 亲手在**深色**课件上采的, 铁律①「一个字不许改」—— 所以
+     :root 原值一个都不碰。但那些亮饱和色写在浅色卡上对比度只有
+     1.2~1.4:1, 六十四卦/八字/梅花页直接用 --xxx-ink, 浅色主题下全
+     看不清 (老板 11-05 compat页「浅色主题什么都看不清楚」同一病根)。
+     compat页当初在自己卡范围里逐个 override, 六十四卦/八字/梅花没有。
+     现在把浅色重映射收进**令牌层**, 浅色家族两档 (宣纸+铁灰) 各覆盖
+     一次 --xxx-ink / --xxx (色块底) / --on-xxx, 全站一次修好, 暗色家族
+     (墨盘+铜夜) 仍走 :root 原值, 一字不动。取值 = compat页 11-05 已验证
+     的浅色可读值 (木 #0B7A3B / 火 #C22A1E / 土 #7A3B14 赭石棕 / 金 #8A7A00 芥末黄 / 水 #0E5FD8; 土=红棕色相23, 金=纯黄色相53, 色相+明度双拉开, 两行必分得开)。 */
+  --wood:      #0B7A3B;
+  --wood-ink:  #0B7A3B;
+  --on-wood:   #FFFFFF;
+  --fire:      #C22A1E;
+  --fire-ink:  #C22A1E;
+  --on-fire:   #FFFFFF;
+  --earth:     #6E5A4A;
+  --earth-ink: #6E5A4A;
+  --on-earth:  #FFFFFF;
+  --metal:     #C99700;
+  --metal-ink: #C99700;
+  --on-metal:  #FFFFFF;
+  --water:     #0E5FD8;
+  --water-ink: #0E5FD8;
+  --on-water:  #FFFFFF;
+}
+
+/* ══ 铁灰 (中性灰, 深灰/浅灰双底) ═══════════════════════════════ */
+[data-theme="iron"] {
+  color-scheme: light;
+
+  /* ── 表面四档: 浅灰画布 → 浅灰卡 → 浅灰卡+ → 浅灰浮层 ────────
+     2026-11-18 重定档: 原来的明度差只有 2~3%, 一屏看过去是「一片
+     死灰」—— 陋就陋在这。现在拉开到 4~6% (Linear 式中性灰阶),
+     画布深一档、卡浮一档, 分层**看得见**, 不靠色温靠明度。 */
+  --background:    #DDE0E3;
+  --card:          #F0F1F2;
+  --card-raise:    #F7F8F8;
+  --card-elevated: #FBFBFB;
+  --surface:       #CFD2D6;
+  --surface-hover: #C3C7CC;
+  --bg-elevated:   var(--card-elevated);
+  --bg-hover:      var(--surface-hover);
+  --chrome:        var(--card);
+  --overlay:       #FAFBFB;
+
+  --border:       #C6CAD0;
+  --border-light: #D9DDE1;
+  --border-hover: #9EA5AD;
+  --input:        #F8F9FA;
+  --hairline:     rgba(24, 27, 30, .10);
+
+  /* ── 壳 (顶栏 + 侧栏): 铁灰的"深灰"那一档 ─────────────────
+     2026-11-18 实测纠偏: 壳只读 --chrome-bg / --side-bg-glass 这两个
+     **玻璃**变量 (--side-bg 实色全站无人引用), 所以上一版把深灰写进
+     --side-bg 根本没渲染, 整屏变成一片浅灰 wash —— 这就是老板说的
+     「灰色很宽泛」。浅灰深灰要落地, 深灰必须给**玻璃**变量: 壳深、
+     画布浅, 两档拉开, 不是靠 --side-bg 这个死变量。 */
+  --chrome-bg:     rgba(29, 31, 34, .86);
+  --side-bg-glass: rgba(24, 26, 29, .90);
+
+  /* ── 侧栏文字档: 深灰壳上 → 浅字 ──────────────────────────── */
+  --side-bg:         #1D1F22;
+  --side-fg:         #B7BCC2;
+  --side-strong:     #F5F6F7;
+  --side-heading:    #6E747B;
+  --side-muted:      #7E848C;
+  --side-border:     rgba(255, 255, 255, .07);
+  --side-hover:      rgba(255, 255, 255, .06);
+  --side-hover-fg:   #F5F6F7;
+  --side-active-bg:  rgba(112, 120, 132, .26);
+  --side-active-fg:  #E8EAED;
+  --side-accent:     #9EA5AD;
+  --side-chip-bg:    rgba(255, 255, 255, .05);
+  --side-chip-border:rgba(255, 255, 255, .10);
+  --side-scrim:      rgba(16, 17, 19, .46);
+
+  /* ── 墨四档 (中性灰, 零暖调) ──────────────────────────────── */
+  --foreground: #191B1E;
+  --text:       #26282C;
+  --text-strong:#0E1012;
+  --text-dim:   #5A5F66;
+  --text-muted: #858B93;
+  --muted:            #D5D8DC;
+  --muted-foreground: #5F656D;
+  --chat-text:        var(--text);
+
+  /* ── 主强调: 铁灰。中性灰本身做交互色, 深/浅底都站得住 ─────── */
+  --primary:           #3A3E44;
+  --primary-foreground:#FFFFFF;
+  --primary-glow:      rgba(58, 62, 68, .10);
+  --primary-glow-strong: rgba(58, 62, 68, .18);
+
+  /* ── 次强调: 保留一点陶土, 只给"要人注意"的东西 ──────────── */
+  --accent:           #8A4F33;
+  --accent-bright:    #6E3B24;
+  --accent-dim:       #75412A;
+  --accent-hover:     #6E3B24;
+  --accent-glow:      rgba(138, 79, 51, .10);
+  --accent-glow-strong: rgba(138, 79, 51, .16);
+  --accent-subtle:    rgba(138, 79, 51, .08);
+  --accent-foreground:#FFFFFF;
+  --text-gold:        #6B6248;
+
+  /* ── 状态: 全部收进中性色域, 灰主题不做彩色 ───────────────── */
+  --green:  #44484E;
+  --green-dim: #33373C;
+  --green-glow: rgba(58, 62, 68, .10);
+  --red:    #8A4F33;
+  --red-dim:#6E3B24;
+  --red-glow: rgba(138, 79, 51, .10);
+  --orange: #6B6E73;
+  --orange-dim: #55585E;
+  --orange-glow: rgba(107, 110, 115, .10);
+  --yellow: #6B6248;
+  --ok:   #44484E;
+  --warn: #6B6248;
+  --error:#8A4F33;
+  --destructive: #8A4F33;
+  --destructive-foreground: #FFFFFF;
+  --status-connected: #44484E;
+  --status-disconnected: #8A4F33;
+  --purple: #5A5F66;
+  --purple-bright: #4A4F56;
+  --purple-dim: #4A4F56;
+  --purple-glow: rgba(90, 95, 102, .10);
+  --purple-glow-strong: rgba(90, 95, 102, .16);
+  --purple-subtle: #DEE0E4;
+
+  --yang: #17191B;
+  --yin:  #A6ABB2;
+
+  --shadow-sm: 0 1px 2px rgba(24, 27, 30, .06), 0 1px 1px rgba(24, 27, 30, .04);
+  --shadow-md: 0 6px 18px -6px rgba(24, 27, 30, .14), 0 1px 3px rgba(24, 27, 30, .06);
+  --shadow-lg: 0 22px 48px -14px rgba(24, 27, 30, .24), 0 6px 14px -8px rgba(24, 27, 30, .10);
+  --shadow-primary: 0 2px 10px rgba(58, 62, 68, .18);
+  --shadow-gold:    0 2px 10px rgba(107, 98, 72, .16);
+  --shadow-purple:  0 2px 10px rgba(90, 95, 102, .16);
+  --focus-glow:      0 0 0 3px rgba(58, 62, 68, .18);
+  --focus-glow-gold: 0 0 0 3px rgba(107, 98, 72, .18);
+
+  --paper-tex: none;
+  --toplight:
+    radial-gradient(1400px 820px at 50% -28%, rgba(255, 255, 255, .70), transparent 68%),
+    radial-gradient(900px 520px at 98% 108%, rgba(58, 62, 68, .050), transparent 62%);
+
+  /* ── 五行色·浅色重映射 (2026-11-18) ──────────────────────────
+     铁灰画布是浅灰 (同宣纸一档), 五行原值亮饱和色在浅灰卡上一样
+     看不清 —— 跟宣纸同一套重映射。:root 原值不动, 暗色家族不动。 */
+  --wood:      #0B7A3B;
+  --wood-ink:  #0B7A3B;
+  --on-wood:   #FFFFFF;
+  --fire:      #C22A1E;
+  --fire-ink:  #C22A1E;
+  --on-fire:   #FFFFFF;
+  --earth:     #6E5A4A;
+  --earth-ink: #6E5A4A;
+  --on-earth:  #FFFFFF;
+  --metal:     #C99700;
+  --metal-ink: #C99700;
+  --on-metal:  #FFFFFF;
+  --water:     #0E5FD8;
+  --water-ink: #0E5FD8;
+  --on-water:  #FFFFFF;
+}
+
+[data-theme="gold"] {
+  color-scheme: dark;
+
+  --background:    #0C0B07;
+  --card:          #15140E;
+  --card-raise:    #1A1811;
+  --card-elevated: #1F1D14;
+  --surface:       #272419;
+  --surface-hover: #302D20;
+  --bg-elevated:   var(--card-elevated);
+  --bg-hover:      var(--surface-hover);
+  --chrome:        var(--card);
+  --overlay:       #1F1D14;
+
+  --border:       rgba(232, 205, 138, .13);
+  --border-light: rgba(232, 205, 138, .08);
+  --border-hover: rgba(232, 205, 138, .26);
+  --input:        #121109;
+  --hairline:     rgba(232, 205, 138, .11);
+
+  --chrome-bg:     rgba(21, 20, 14, .76);
+  --side-bg-glass: rgba(14, 13, 8, .78);
+
+  --side-bg:         #100F08;
+  --side-fg:         #E4DECB;
+  --side-strong:     #FBF6E8;
+  --side-heading:    #8C8266;
+  --side-muted:      #8E8467;
+  --side-border:     rgba(232, 205, 138, .08);
+  --side-hover:      rgba(232, 205, 138, .07);
+  --side-hover-fg:   #FBF6E8;
+  --side-active-bg:  rgba(232, 205, 138, .13);
+  --side-active-fg:  #EED79B;
+  --side-accent:     #E8CD8A;
+  --side-chip-bg:    rgba(232, 205, 138, .08);
+  --side-chip-border:rgba(232, 205, 138, .18);
+  --side-scrim:      rgba(8, 7, 4, .60);
+
+  --foreground: #ECE7D8;
+  --text:       #E2DCCB;
+  --text-strong:#FBF7EA;
+  --text-dim:   #BDB59E;
+  --text-muted: #96907C;
+  --muted:            #272419;
+  --muted-foreground: #9A937E;
+  --chat-text:        var(--text);
+
+  --primary:           #E8CD8A;
+  --primary-foreground:#1C1809;
+  --primary-glow:      rgba(232, 205, 138, .13);
+  --primary-glow-strong: rgba(232, 205, 138, .22);
+
+  --accent:           #E0704F;
+  --accent-bright:    #F28A6B;
+  --accent-dim:       #C45538;
+  --accent-hover:     #F28A6B;
+  --accent-glow:      rgba(224, 112, 79, .14);
+  --accent-glow-strong: rgba(224, 112, 79, .24);
+  --accent-subtle:    rgba(224, 112, 79, .12);
+  --accent-foreground:#1A0904;
+  --text-gold:        #E8CD8A;
+
+  --green:  #6FBE95;
+  --green-dim: #4F9B77;
+  --green-glow: rgba(111, 190, 149, .14);
+  --red:    #E0704F;
+  --red-dim:#C45538;
+  --red-glow: rgba(224, 112, 79, .14);
+  --orange: #D6A05C;
+  --orange-dim: #A97C3F;
+  --orange-glow: rgba(214, 160, 92, .14);
+  --yellow: #E8CD8A;
+  --ok:   #6FBE95;
+  --warn: #E8CD8A;
+  --error:#E0704F;
+  --destructive: #E0704F;
+  --destructive-foreground: #1A0904;
+  --status-connected: #6FBE95;
+  --status-disconnected: #E0704F;
+  --purple: #A493D6;
+  --purple-bright: #BBA9E6;
+  --purple-dim: #8376B8;
+  --purple-glow: rgba(164, 147, 214, .14);
+  --purple-glow-strong: rgba(164, 147, 214, .24);
+  --purple-subtle: #241F36;
+
+  --yang: #F2EDDE;
+  --yin:  #6E6754;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, .34);
+  --shadow-md: 0 8px 22px -6px rgba(0, 0, 0, .52);
+  --shadow-lg: 0 26px 58px -14px rgba(0, 0, 0, .70), 0 8px 18px -8px rgba(0, 0, 0, .45);
+  --shadow-primary: 0 2px 12px rgba(232, 205, 138, .20);
+  --shadow-gold:    0 2px 12px rgba(232, 205, 138, .20);
+  --shadow-purple:  0 2px 12px rgba(164, 147, 214, .20);
+  --focus-glow:      0 0 0 3px rgba(232, 205, 138, .26);
+  --focus-glow-gold: 0 0 0 3px rgba(232, 205, 138, .26);
+
+  --paper-tex: none;
+  --toplight:
+    radial-gradient(1400px 820px at 50% -28%, rgba(255, 240, 200, .050), transparent 70%),
+    radial-gradient(900px 520px at 98% 110%, rgba(224, 112, 79, .035), transparent 64%);
+
+  /* ── 五行色·统一 (2026-11-18 老板拍: 四个 ui 要统一) ─────────────
+     四套主题**同一套五行色**: 金 999 #C99700 / 土 灰棕 #6E5A4A / 木 #0B7A3B /
+     火 #C22A1E / 水 #0E5FD8。覆盖 :root 老板原值 (亮饱和 金 #FFEE00 等) ——
+     原值在浅底上读不清, 且金土同黄相易混; 统一集在深浅底都读得出 (深底对比度
+     金 7.4 / 其余 ≥3.4)。字色 --on-xxx 全白 (中调色块上白字, 深浅底都稳)。
+     这取代了之前「深色走原值 / 浅色走重映射」的两套, 四 ui 五行色一致。 */
+  --wood:      #0B7A3B;
+  --wood-ink:  #0B7A3B;
+  --on-wood:   #FFFFFF;
+  --fire:      #C22A1E;
+  --fire-ink:  #C22A1E;
+  --on-fire:   #FFFFFF;
+  --earth:     #6E5A4A;
+  --earth-ink: #6E5A4A;
+  --on-earth:  #FFFFFF;
+  --metal:     #C99700;
+  --metal-ink: #C99700;
+  --on-metal:  #FFFFFF;
+  --water:     #0E5FD8;
+  --water-ink: #0E5FD8;
+  --on-water:  #FFFFFF;
+}

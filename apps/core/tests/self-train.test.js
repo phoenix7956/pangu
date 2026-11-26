@@ -1,0 +1,5 @@
+'use strict';
+const assert = require('node:assert/strict'); const fs = require('node:fs'); const os = require('node:os'); const path = require('node:path'); const { run, splitSamples } = require('../scripts/self_train');
+const root = fs.mkdtempSync(path.join(os.tmpdir(), 'pangu-self-train-')); const source = path.join(root, 'evolution.jsonl'); const output = path.join(root, 'training');
+fs.writeFileSync(source, Array.from({ length: 40 }, (_, i) => JSON.stringify({ input: 'task-' + i, final_text: '完成并通过验证', success: true, tool_calls_total: 1, tool_names: ['file_edit'] })).join('\n') + '\n');
+const manifest = run(['--source', source, '--output', output, '--min-eval', '1']); assert.equal(manifest.schema, 'pangu.self-training/v1'); assert.ok(manifest.split.eval > 0); assert.equal(manifest.promotion.eligible, true); assert.ok(fs.existsSync(path.join(output, 'train.jsonl'))); assert.ok(fs.existsSync(path.join(output, 'eval.jsonl'))); const grouped = splitSamples([{ task: 'same' }, { task: 'same' }]); assert.ok(grouped.train.length === 0 || grouped.eval.length === 0); console.log('self-training controller tests: ok');

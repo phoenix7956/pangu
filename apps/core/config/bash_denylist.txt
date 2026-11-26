@@ -1,0 +1,74 @@
+# Pangu Bash 永久危险拦截清单 (§0.7 + W6-2 抄 Claude Code)
+# 2026-07-09 老板拍: 集中 deny list, 不散落 sandbox.js 各处
+# 规则: 任何工具调 exec_command 时, sandbox 必查这个清单
+# 匹配方式: 正则 substring match (大小写敏感)
+
+# === 文件系统破坏 ===
+rm -rf /
+rm -rf /*
+rm -rf ~/
+rm -rf \./*
+mv /* /dev/null
+find / -delete
+find / -exec rm -f {} \;
+:(){ :|:& };:                                # fork bomb
+
+# === 权限破坏 ===
+chmod -R 777 /
+chmod -R 777 /etc
+chown -R root /
+chmod 000 /etc
+
+# === 磁盘破坏 ===
+dd if=/dev/zero of=/dev/sda
+dd if=/dev/urandom of=/dev/sda
+mkfs.ext4 /dev/sda
+mkfs.* /dev/sd*
+fdisk /dev/sda
+
+# === 系统破坏 ===
+mv /etc /dev/null
+cp /dev/null /etc/passwd
+echo "" > /etc/passwd
+echo "" > /etc/sudoers
+rm /etc/passwd
+rm /etc/shadow
+reboot
+shutdown -h now
+halt
+poweroff
+init 0
+init 6
+
+# === 网络破坏 ===
+iptables -F
+iptables --flush
+rm -rf /var/log
+echo "" > /var/log/auth.log
+
+# === 包管理破坏 ===
+npm install -g
+pip install --break-system-packages
+rm -rf /usr/local/lib/node_modules
+rm -rf /usr/local/lib/python*
+brew uninstall --force
+
+# === 远程执行 ===
+curl.*\|.*bash
+curl.*\|.*sh
+wget.*\|.*bash
+wget.*\|.*sh
+nc -e
+bash -i.*>& /dev/tcp
+python.*-c.*socket.*subprocess
+
+# === SSH/认证破坏 ===
+ssh-keygen -R
+rm -rf ~/.ssh
+cat /dev/null > ~/.ssh/authorized_keys
+
+# === Pangu 本体破坏 ===
+rm -rf ~/.pangu
+rm -rf ~/.openclaw
+rm -rf ~/Library/LaunchAgents
+rm ~/.pangu/pangu-single.js

@@ -1,0 +1,26 @@
+name: 功能建议
+description: 想让盘古多做什么
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 现在做不到什么
+      description: 说场景，不说方案
+    validations:
+      required: true
+  - type: textarea
+    id: layer
+    attributes:
+      label: 你觉得该动哪一层
+      options:
+        - 主 agent / self-loop
+        - 将灵集群 (角色/白名单)
+        - 谋断内核 64i
+        - 工具层
+        - 接入方式 (HTTP / MCP)
+        - 说不清
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 你试过什么
