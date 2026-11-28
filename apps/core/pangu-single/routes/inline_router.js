@@ -856,31 +856,6 @@ async function handler(req, res) {
     fs.createReadStream(fp).pipe(res);
     return;
   }
-
-  // ==================== 梅花起卦确定性 API (2026-08-03 老板拍: 前台页面直接用, 不走 LLM 零幻觉) ====================
-  // POST /api/meihua/cast  {question?, numbers?:[n1,n2,n3]} → castGua 完整结果 (本卦/互卦/变卦/体用吉凶/农历)
-  if ((pathname === '/meihua/cast' || pathname === '/api/meihua/cast') && req.method === 'POST') {
-    let body = ''; let castAborted = false;
-    req.on('data', c => { if (castAborted) return; body += c; if (body.length > 64 * 1024) { castAborted = true; res.writeHead(413); res.end('{}'); try { req.destroy(); } catch (_) {} } });
-    req.on('end', () => {
-      if (castAborted) return;
-      let b;
-      try { b = JSON.parse(body || '{}'); }
-      catch (_) { return json(res, { ok: false, error: 'INVALID_JSON' }, 400); }
-      try {
-        const { castGua } = require('../../modules/gua_engine');
-        const numbers = Array.isArray(b.numbers) && b.numbers.length >= 2 ? b.numbers.slice(0, 3).map(Number) : undefined;
-        const gua = castGua(String(b.question || '').slice(0, 200), { numbers });
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ ok: true, data: gua }));
-      } catch (e) {
-        res.writeHead(500, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ ok: false, error: e.message }));
-      }
-    });
-    return;
-  }
-
   // ==================== 节点列表 ====================
   if (pathname === '/nodes' || pathname === '/api/nodes') {
     res.writeHead(200, {'Content-Type': 'application/json'});
