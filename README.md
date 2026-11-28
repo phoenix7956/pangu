@@ -26,7 +26,7 @@ Pangu 是一个**通用 AI Agent 内核**：会自己拆任务、派活、验收
 > 打开 `http://127.0.0.1:18901/` 直接进**工作台**（根路径就是界面，没有多余前缀）；
 > 只想调 API：`GET /api` 返回一张 API 索引页，列明全部可直接调用的端点 + 接入示例。
 > 工作台的每一页就是一个**路径**：`/bazi` 八字排盘 · `/hexagrams` 六十四卦 ·
-> `/meihua` 梅花起卦 · `/settings` 系统设置 · `/history` 历史档案 · `/status` 状态。
+> `/settings` 系统设置 · `/history` 历史档案 · `/status` 状态。
 > 源码在 `apps/core/web/app/`（手写 HTML+CSS+ESM，**零构建、零 npm 依赖、零外部资源**）。
 > 本仓**不含**桌面客户端 —— 没有 Electron / Vite / Tauri 那一套壳。
 
@@ -106,7 +106,6 @@ Debian/Ubuntu 用 `apt-get install -y python3 make g++`。
 |------|----------|
 | 对话 | 主 agent 流式对话（SSE），工具调用卡 / 来源标记 / 推理摘要都画出来 |
 | 六十四卦 | 64 卦全表，可按五行筛、可搜；点卦看卦辞 / 大象 / 逐爻爻辞 |
-| 梅花起卦 | 数字起卦或时间起卦 → 本卦 / 互卦 / 变卦 + 体用吉凶 |
 | 八字排盘 | 四柱 / 五行 / 喜忌 / 神煞 / 大运 / 流年 / 流月 |
 | 历史 | 历史 session 列表与回放 |
 | 进化 | 自进化闭环的逐日账本：任务量 / 成功率 / 耗时 / 工具 / 模型，plotly 离线画图 |
@@ -226,7 +225,6 @@ protocol ∈ { openai, anthropic }   # 与 provider 独立选
 | GET | `/api/hexagrams` | 64 卦全文（直读 64i 真源） |
 | POST | `/api/pangu/agent/stream` | 主 agent 流式对话（SSE） |
 | POST | `/api/message/stream` | 兼容端点（流式，带升级阶梯） |
-| POST | `/api/meihua/cast` | 梅花易数起卦 |
 
 跨源接入时用环境变量开白名单（默认只放行本机 18901）：
 
