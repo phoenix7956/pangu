@@ -39,6 +39,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const APP = path.join(__dirname, '..', 'web', 'app');
+// 开源导出树剥了 7 轨视图 (含 meihua.mjs), 梅花页的脚注带断言只在私有树验 (跟 workbench-full-ui 同一机制)。
+const IS_OPEN_SOURCE = fs.existsSync(path.join(__dirname, '..', '64i', '.pangu-open-source'));
 
 // 注释剥除器是**共享**的 (tests/helpers/strip-comments.js) ——
 // 两个 UI 守卫都踩过「注释里写着旧类名/旧 emoji, 守卫自己咬自己」的坑。
@@ -441,8 +443,11 @@ test('150-1: 内容页 (状态/历史/将灵/自动化/梅花) 都用 .pg-footba
   assert.ok(/\.pg-footband\s*{/.test(ds), '收口带画法必须住 design-system.css');
   const util = readJs('lib/util.mjs');
   assert.ok(/export function footband\b/.test(util), '收口带零件工厂必须住 lib/util.mjs');
-  for (const v of ['views/status.mjs', 'views/history.mjs', 'views/subagents.mjs',
-    'views/team.mjs', 'views/meihua.mjs']) {
+  // 开源树剥了 meihua.mjs ⇒ 梅花页不在脚注带断言清单里 (私有树照验)
+  const footbandPages = IS_OPEN_SOURCE
+    ? ['views/status.mjs', 'views/history.mjs', 'views/subagents.mjs', 'views/team.mjs']
+    : ['views/status.mjs', 'views/history.mjs', 'views/subagents.mjs', 'views/team.mjs', 'views/meihua.mjs'];
+  for (const v of footbandPages) {
     assert.ok(readJs(v).includes('footband'),
       v + ' 没有收口带 ⇒ 大段死黑又回来了');
   }

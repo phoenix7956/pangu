@@ -30,6 +30,8 @@ const test = require('node:test');
 const assert = require('node:assert');
 const fs = require('node:fs');
 const path = require('node:path');
+// 开源导出树剥了 7 轨视图 ⇒ 页面层 CSS/JS 清单本就比私有树短, 170-7 的下限随模式走。
+const IS_OPEN_SOURCE = fs.existsSync(path.join(__dirname, '..', '64i', '.pangu-open-source'));
 
 const APP = path.join(__dirname, '..', 'web', 'app');
 const { stripComments } = require('./helpers/strip-comments.js');
@@ -37,13 +39,16 @@ const readCss = (rel) => stripComments(fs.readFileSync(path.join(APP, rel), 'utf
 const readJs = (rel) => stripComments(fs.readFileSync(path.join(APP, rel), 'utf8'));
 
 /** 页面层 CSS —— 这些文件只许改摆放, 不许自己造外观。 */
+// 开源导出树剥了 7 轨视图 (meihua/qimen/bazhai/liuren/mianxiang .css/.mjs) ⇒ 只扫真在盘上的。
+// 私有树文件齐全, 过滤是空操作, 行为不变。
+const _onDisk = (rel) => fs.existsSync(path.join(APP, rel));
 const PAGE_CSS = [
   'views.css', 'components.css', 'settings.css',
   'views/bazi.css', 'views/meihua.css', 'views/hexagrams.css',
   'views/qimen.css',
   'views/bazhai.css',
   'views/liuren.css', 'views/mianxiang.css',
-];
+].filter(_onDisk);
 
 /** 页面层 JS —— 十页。 */
 const PAGE_JS = [
@@ -53,7 +58,7 @@ const PAGE_JS = [
   'views/qimen.mjs',
   'views/bazhai.mjs',
   'views/liuren.mjs', 'views/mianxiang.mjs',
-];
+].filter(_onDisk);
 
 /**
  * 自造区块壳白名单 —— 登记制: 想新造一个「卡片/盒子/面板」, 得先在这里
@@ -200,8 +205,11 @@ test('170-6b: 负例自检 —— 超量的 primary 得被挑出来', () => {
 });
 
 test('170-7: 守卫本身得在工作 (扫到的文件不能太少)', () => {
-  assert.ok(PAGE_CSS.length >= 6, '页面 CSS 清单太短: ' + PAGE_CSS.join(', '));
-  assert.ok(PAGE_JS.length >= 10, '页面 JS 清单太短: ' + PAGE_JS.join(', '));
+  // 下限: 私有树 10 CSS / 10+ JS; 开源树剥了 7 轨 ⇒ 5 CSS / 9 JS (真在盘上就算够)
+  const cssFloor = IS_OPEN_SOURCE ? 5 : 6;
+  const jsFloor = IS_OPEN_SOURCE ? 9 : 10;
+  assert.ok(PAGE_CSS.length >= cssFloor, '页面 CSS 清单太短: ' + PAGE_CSS.join(', '));
+  assert.ok(PAGE_JS.length >= jsFloor, '页面 JS 清单太短: ' + PAGE_JS.join(', '));
   for (const rel of PAGE_CSS) {
     assert.ok(fs.existsSync(path.join(APP, rel)), '找不到 ' + rel);
   }
