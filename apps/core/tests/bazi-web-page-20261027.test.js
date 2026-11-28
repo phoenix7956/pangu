@@ -106,10 +106,16 @@ test('113-1: 静态出口只伺服 web/app 一个目录, 越界/非白名单一�
   //   (核的是真表, 不是复制一份 —— 守卫自己也会钉错口径)
   const ws = require(path.join(CORE, 'pangu-single', 'routes', 'web_static.js'));
   const MIME_OK = new Set(Object.keys(ws.MIME));
+  // vendor/ 里的 README / *.LICENSE.txt 是**说明/许可文件**, 浏览器永不请求,
+  //   不在伺服 MIME 表里也正常 (静态出口对它们会 404, 但没人会去 fetch 它们)。
+  //   只要求「会被伺服的真资源」扩展名在白名单, 不要求说明性文档也是。
+  // 说明/许可文件 (README / *-LICENSE.txt / *.LICENSE.txt): 浏览器永不请求, 不在伺服 MIME 表
+  const NON_SERVED = (f) => f === 'README.md' || /LICENSE\.txt$/.test(f);
   (function walk(d) {
     for (const f of fs.readdirSync(d)) {
       const full = path.join(d, f);
       if (fs.statSync(full).isDirectory()) { walk(full); continue; }
+      if (NON_SERVED(f)) continue;
       const ext = path.extname(full).toLowerCase();
       assert.ok(MIME_OK.has(ext),
         path.relative(APP, full) + ' 的扩展名不在伺服白名单里 (' + ext + ')');

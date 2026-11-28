@@ -118,13 +118,21 @@ test('114-3: 工作台不许把桌面端那套构建产物/框架带回来', () 
   assert.ok(files.length >= 8, '工作台文件太少: ' + files.length);
   for (const f of files) {
     const raw = fs.readFileSync(f, 'utf8');
+    // vendor/ 里是**第三方成品库** (plotly 等): 它内部的 `plotly_react` /
+    //   `t.react=n.react` 是库的属性名, 不是「桌面端 React 回流」。
+    //   框架回流判据只核**自写代码** (web/app 下非 vendor 部分)。
+    const isVendored = f.replace(/\\/g, '/').includes('/vendor/');
     // 2026-10-27 (第 116 批): 扫**代码**, 不扫注释 ——
     //   「原版用 lucide-react」这种说明性注释被判成「框架回流」是假红。
     //   (前导 (^|\s) 保证 http:// 里的 // 不被当注释切掉)
     const src = raw.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|\s)\/\/[^\n]*/g, '$1');
-    assert.ok(!/\breact\b/i.test(src), path.basename(f) + ' 里出现 react ⇒ 桌面端那套回来了');
-    assert.ok(!/\bvite\b/i.test(src), path.basename(f) + ' 里出现 vite ⇒ 桌面端那套回来了');
-    assert.ok(!/from ['"]node_modules/.test(src), path.basename(f) + ' 引了 node_modules');
+    if (!isVendored) {
+      // Plotly.react() 是图表库的原地更新方法 (不是 React 框架), 排除误报
+      const srcNoPlotlyReact = src.replace(/\bPlotly\.react\b/g, '');
+      assert.ok(!/\breact\b/i.test(srcNoPlotlyReact), path.basename(f) + ' 里出现 react ⇒ 桌面端那套回来了');
+      assert.ok(!/\bvite\b/i.test(src), path.basename(f) + ' 里出现 vite ⇒ 桌面端那套回来了');
+      assert.ok(!/from ['"]node_modules/.test(src), path.basename(f) + ' 引了 node_modules');
+    }
     // 「自给自足」管的是**真去加载外部资源**, 不是文本里出现 URL:
     //   · w3.org 的 XML 命名空间 (createElementNS 用) —— 不发请求
     //   · 输入框 placeholder 里的示例地址 (如 api.openai.com/v1) —— 是给用户看的

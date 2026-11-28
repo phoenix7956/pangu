@@ -133,7 +133,7 @@ test('116-2: 侧栏分组和路径跟原版一致', () => {
   const _ITEMS = [
     ['工作台', './'],
     ['自动化', 'team'],
-    ...['梅花起卦', 'meihua'], // 开源树无 meihua 视图, 下面 ITEMS 过滤剔除
+    ['梅花起卦', 'meihua'],    // 开源树无 meihua 视图, 下面 ITEMS 过滤剔除
     // 第 119 批: 八字排盘搬进工作台 ⇒ 侧栏指向 /bazi (不再是独立静态页)
     ['八字排盘', 'bazi'],
     ['六十四卦', 'hexagrams'],
@@ -182,7 +182,9 @@ test('116-4: ⌘K / Ctrl+K 能调出令符, 方向键 + Enter + Esc 都在', () 
   );
   const NAMES = ['工作台', '自动化', '梅花起卦', '八字排盘', '六十四卦',
     '历史档案', '工具集', '将灵', '状态', '系统设置'];
-  for (const name of NAMES) {
+  // 开源树剥了 meihua 视图 ⇒ 令符清单里没有「梅花起卦」, 该项只验私有树
+  const _NAMES = NAMES.filter((n) => !(IS_OPEN_SOURCE && TRACK_VIEWS.has(n === '梅花起卦' ? 'meihua' : n)));
+  for (const name of _NAMES) {
     assert.ok(cmds.includes("'" + name + "'"), '令符清单缺「' + name + '」');
   }
   assert.ok(cmds.includes("act: 'theme'"), '令符必须有切主题');

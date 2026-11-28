@@ -57,6 +57,7 @@ const COMMANDS = [
   { name: '工作台', hint: '主对话', go: './' },
   { name: '自动化', hint: '起六爻 · 批果 · 复盘', go: 'team' },
   { name: '八字排盘', hint: '四柱 · 大运流年', go: 'bazi' },
+  { name: '六十四卦', hint: '六十四卦全文 · 按五行筛', go: 'hexagrams' },
   { name: '历史档案', hint: '按日期归档', go: 'history' },
   { name: '工具集', hint: '技能市场 · 内部工具', go: 'marketplace' },
   { name: '将灵', hint: '八将灵运行态', go: 'subagents' },
