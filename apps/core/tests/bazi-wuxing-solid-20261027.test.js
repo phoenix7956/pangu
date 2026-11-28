@@ -42,14 +42,16 @@ const css = fs.readFileSync(H.BAZI_CSS, 'utf8');
 const themes = fs.readFileSync(H.THEMES, 'utf8');
 const mjs = fs.readFileSync(BAZI_MJS, 'utf8');
 
-test('128w-1: 三套主题的五行色板 = 老板采的五原值 (不许悄悄漂)', () => {
+test('128w-1: 三套主题的五行色板 = 11-18 四主题统一可读值 (不许悄悄漂)', () => {
+  // 老板 10-27 采的五原值 (H.BOSS) 仍守 :root; 第 180-193 批 (11-18) 把四个
+  //   themed 块统一成可读值 (H.THEMED), 修「浅色下五行色看不清」。本条守 themed 块。
   const sets = H.themeWxVars(themes);
   assert.ok(sets.length >= 3, '至少要认出三套主题, 实际 ' + sets.length);
   for (const set of sets) {
     for (const w of H.NAMES) {
-      assert.strictEqual(set[w].toUpperCase(), H.BOSS[w].toUpperCase(),
+      assert.strictEqual(set[w].toUpperCase(), H.THEMED[w].toUpperCase(),
         '主题 ' + set.__theme + ' 的 ' + w + ' 是 ' + set[w]
-        + ', 老板在课件上采的是 ' + H.BOSS[w]);
+        + ', 11-18 统一可读值是 ' + H.THEMED[w]);
     }
   }
 });
@@ -70,17 +72,14 @@ test('128w-2: 字色档 (--xxx-ink) 必须存在, 且跟本色同色系', () => 
   }
 });
 
-test('128w-3: 五行字色 = 老板采的五原值 (老板: 全都按这个, 别搞了)', () => {
+test('128w-3: themed 五行字色 = 11-18 统一可读值 (ink 拉平到本色)', () => {
   for (const set of H.themeWxVars(themes)) {
     for (const w of H.NAMES) {
-      // ⚠ 这一条原来是「字色对卡底 ≥ 3:1」—— 老板 10-27 把字色打回过两次,
-      //   最后拍板: 「木 #00FF1D / 火 #FF0000 / 土 #B28C21 / 金 #FFEE00 / 水 #0E70F2。
-      //   **全都按这个, 别搞了**」。
-      //   浅色卡底上木 1.33:1 / 金 1.17:1 —— 老板知情拍板 (课件自己就这么画:
-      //   艳色压浅底, 大号粗体字)。**不许再自作主张压暗/提亮**。
-      assert.strictEqual(set.__ink[w].toUpperCase(), H.BOSS[w].toUpperCase(),
+      // 第 180-193 批 (11-18): themed 块把 ink 也拉平到可读本色 (= H.THEMED),
+      //   不再是 10-27 的「字色=老板采五原值」。:root 原值仍由 H.BOSS 守, 不在此列。
+      assert.strictEqual(set.__ink[w].toUpperCase(), H.THEMED[w].toUpperCase(),
         '主题 ' + set.__theme + ': ' + w + ' 字色 ' + set.__ink[w]
-        + ' 必须等于老板采的 ' + H.BOSS[w]);
+        + ' 必须等于 11-18 统一可读值 ' + H.THEMED[w]);
     }
   }
 });

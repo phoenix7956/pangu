@@ -163,20 +163,18 @@ test('121w-1: 五个五行色两两分得开 (CIELAB ΔE ≥ 25)', () => {
     }
   }
 });
-test('121w-2: 五行**文字色**(ink 档) = 老板采的五原值 (第 128 批: 全都按这个, 别搞了)', () => {
+test('121w-2: themed 五行**文字色**(ink 档) = 11-18 统一可读值', () => {
   const css = fs.readFileSync(THEMES, 'utf8');
   for (const set of themeWxVars(css)) {
     assert.ok(set.__card, '主题 ' + set.__theme + ' 没解析出 --card 底色');
     for (const w of ['木', '火', '土', '金', '水']) {
       const ink = set.__ink[w];
       assert.ok(ink, '主题 ' + set.__theme + ' 缺 ' + w + ' 的 --' + WX_VAR[w] + '-ink 文字色档');
-      // 第 128 批: 老板把字色打回过一次, 最后拍板「全都按这个, 别搞了」——
-      //   **三套主题的字色一律 = 老板在课件上采的五原值**, 不许按主题另调一版,
-      //   也不许自作主张压暗/提亮 (前两版都被打回)。
-      //   (浅色卡底上木 1.33:1 / 金 1.17:1 —— 老板知情拍板, 课件自己就这么画。)
-      assert.strictEqual(ink.toUpperCase(), H.BOSS[w].toUpperCase(),
+      // 第 180-193 批 (11-18): themed 块 ink 拉平到可读本色 (= H.THEMED), 取代 128 批的
+      //   「字色=老板采五原值」。:root 原值仍由 H.BOSS 守, 不在此列。
+      assert.strictEqual(ink.toUpperCase(), H.THEMED[w].toUpperCase(),
         '主题 ' + set.__theme + ': ' + w + ' 的字色 ' + ink
-        + ' 必须等于老板采的 ' + H.BOSS[w] + ' —— 不许有变体');
+        + ' 必须等于 11-18 统一可读值 ' + H.THEMED[w] + ' —— 不许有变体');
     }
   }
 });
@@ -228,13 +226,14 @@ test('121w-5: 五行条上的字**逐五行**换色 (不能一个 --wx-bar-fg �
 //   「其实都按照大运流年的颜色就可以」。
 //   ⇒ 现在浅色主题的五行色 = 第 126 批色板 (helpers/wuxing_color.js 里那一份),
 //     课件原色退成「色相参考」: 色相还是那个色相, 明度为了可读性调过。
-test('122w-1: 浅色主题五行色 = 老板在课件上采的五原值 (一个字都不许改)', () => {
+test('122w-1: 浅色主题五行色 = 11-18 四主题统一可读值', () => {
   const css = fs.readFileSync(THEMES, 'utf8');
   const light = themeWxVars(css).find((s) => s.__theme === 'light');
   assert.ok(light, '没解析出浅色主题');
   for (const w of ['木', '火', '土', '金', '水']) {
-    assert.strictEqual(light[w].toUpperCase(), H.BOSS[w].toUpperCase(),
-      '浅色主题 ' + w + ' 必须用老板采的 ' + H.BOSS[w] + ', 实际 ' + light[w]);
+    // 第 180 批 (11-18): 浅色主题五行色收进令牌层用可读值 (修「浅色下看不清」), 不再是 10-27 原值
+    assert.strictEqual(light[w].toUpperCase(), H.THEMED[w].toUpperCase(),
+      '浅色主题 ' + w + ' 必须用 11-18 统一可读值 ' + H.THEMED[w] + ', 实际 ' + light[w]);
   }
   // 色相不能跑偏: 木绿 / 火红 / 土赭金 / 金黄 / 水蓝
   const wantHue = { 木: [90, 160], 火: [0, 20], 土: [25, 62], 金: [45, 62], 水: [190, 230] };
@@ -296,13 +295,14 @@ test('122w-4: 五行字色走 --xxx-ink (第 128 批: 五行是字色, 不铺块
 //     「全都按这个, 别搞了」
 //   ⇒ 我自己发明的两版 (压暗的 #0F9E38/#7A4A1E/#B8860B、课件实测的
 //     #12E23D/#846E0B/#E49411) **全部作废**; 三套主题字色一律 = 老板原值。
-test('128w-1: 三套主题五行**字色** = 老板采的五原值 (一个字都不许改, 不许按主题分版)', () => {
+test('128w-1: 三套主题五行**字色** = 11-18 统一可读值 (ink 拉平到本色)', () => {
   const css = fs.readFileSync(THEMES, 'utf8');
   const sets = themeWxVars(css);
   assert.ok(sets.length >= 3, '至少三套主题, 实际 ' + sets.length);
   for (const set of sets) {
     for (const w of ['木', '火', '土', '金', '水']) {
-      assert.strictEqual(set.__ink[w].toUpperCase(), H.BOSS[w].toUpperCase(),
+      // 第 180-193 批 (11-18): themed 块字色拉平到可读本色 (= H.THEMED), 取代 128 批原值
+      assert.strictEqual(set.__ink[w].toUpperCase(), H.THEMED[w].toUpperCase(),
         '主题 ' + set.__theme + ': ' + w + ' 的字色必须照抄老板采的 ' + H.BOSS[w]
         + ', 实际 ' + set.__ink[w]);
     }

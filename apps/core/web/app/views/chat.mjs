@@ -35,7 +35,6 @@ const SESSION_KEY = 'pangu:chat:session:v1';
 // 不用在中间堆 —— 中间只放「问得出口的话」。
 // 照搬样稿 2.0 viewHome 的三张功能卡 (老板 11-04)。文案/示例句原样来自 redesign-sample。
 const SUGG_CARDS = [
-  { ico: '◈', label: '梅花起卦', desc: '报数、摇时、外应 —— 三种起法, 即问即占', ph: '帮我起一卦, 报数 3 7 9' },
   { ico: '☰', label: '八字排盘', desc: '四柱五行、大运流年、神煞喜忌, 一盘尽览', ph: '例如: 帮我排一下 1991年11月23日 20:23 生于江苏盐城的八字…' },
   { ico: '✦', label: '问一件事', desc: '工作、合作、行止 —— 直接说, 不用选工具', ph: '帮我问一件事: ' },
 ];
@@ -931,15 +930,13 @@ export async function render(root) {
     });
     main.appendChild(composer);
 
-    // ── sugg: 三张功能卡 (样稿原样, 静态; 唯一动作 = 把样稿 placeholder 那句填进上面输入框) ──
-    const sugg = el('div', { class: 'sugg' });
+    // ── sugg: 入口走全站统一清单行 (.pg-list-row), 一行一条, 不许回 2×2 图标墙 ──
+    //   每条 = 图标 · 标题 · 说明, 点它把示例句填进上面输入框 (不造新行为)。
+    const sugg = el('div', { class: 'pg-list' });
     for (const card of SUGG_CARDS) {
-      const cd = el('div', { class: 'sugg-card' });
-      cd.appendChild(el('div', { class: 't' }, card.ico + ' ' + card.label));
-      cd.appendChild(el('div', { class: 'd' }, card.desc));
-      // 样稿卡是纯展示; 这里唯一接的动作 = 把样稿同款示例句填进 composer, 不造新行为。
-      cd.addEventListener('click', () => { ta.value = card.ph; ta.focus(); });
-      sugg.appendChild(cd);
+      const row = listRow({ icon: card.ico, title: card.label, desc: card.desc });
+      row.addEventListener('click', () => { ta.value = card.ph; ta.focus(); });
+      sugg.appendChild(row);
     }
     main.appendChild(sugg);
 

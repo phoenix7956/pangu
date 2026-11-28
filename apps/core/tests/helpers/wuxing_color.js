@@ -52,6 +52,16 @@ const ON = {
   木: '#0A0A0A', 火: '#0A0A0A', 土: '#0A0A0A', 金: '#0A0A0A', 水: '#FFFFFF',
 };
 
+/**
+ * 第 180-193 批 (2026-11-18, 老板 8 连拍): 四个 ui 主题五行色统一成**可读值**,
+ * 修「浅色主题下五行色看不清」。:root 仍守老板 10-27 采的五原值 (BOSS), 但
+ *   [data-theme] 的 themed 块 (dark/light/iron/gold) 全用这套可读值。
+ * 五行底色 = ink 字色同值 (可读版把 ink 也拉平到本色, 不再压暗/提亮)。
+ */
+const THEMED = {
+  木: '#0B7A3B', 火: '#C22A1E', 土: '#6E5A4A', 金: '#C99700', 水: '#0E5FD8',
+};
+
 const PALETTE = {
   light: {
     card: '#FBFCFB',
@@ -205,7 +215,7 @@ function ruleBody(css, selector) {
 }
 
 module.exports = {
-  WEB, THEMES, BAZI_CSS, WX_VAR, NAMES, PALETTE, BOSS, ON,
+  WEB, THEMES, BAZI_CSS, WX_VAR, NAMES, PALETTE, BOSS, ON, THEMED,
   MIN_DELTA_HUO_TU, MIN_DELTA_TU_JIN, MIN_DELTA_ANY, MIN_CONTRAST,
   hexToRgb, relLum, contrastRatio, hexToLab, deltaE, hue,
   themeWxVars, ruleBody,

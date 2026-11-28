@@ -948,17 +948,6 @@
   display: grid; place-items: center; border: none; cursor: pointer;
 }
 .meta { font-size: var(--fs-meta); color: var(--text-muted); }
-/* 三张功能卡 (样稿 .sugg) */
-.sugg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 720px; margin: 20px auto 0; }
-.sugg .sugg-card {
-  text-align: left; cursor: pointer; transition: border-color .12s, transform .12s;
-  background: var(--card); border: 1px solid var(--border-light);
-  border-radius: var(--r-lg); padding: 18px;
-}
-.sugg .sugg-card:hover { border-color: var(--border-hover); transform: translateY(-1px); }
-.sugg .t { font-weight: 600; color: var(--text-strong); margin-bottom: 5px; display: flex; gap: 8px; align-items: center; }
-.sugg .d { font-size: var(--fs-meta); color: var(--text-muted); line-height: 1.6; }
-
 /* 首屏 hero —— 对齐样稿 2.0 viewHome: 居中活爻柱 + 大字 + 副题。
    机器读数不再挤进这一行 (下面「这台机器」读数条里有, 同屏不说两遍)。 */
 .pg-open-hero {
