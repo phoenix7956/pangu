@@ -4,7 +4,7 @@
 
 [![Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Node 22+](https://img.shields.io/badge/node-%3E%3D22-brightgreen)](https://nodejs.org)
-[![CI](https://github.com/feng/pangu/actions/workflows/ci.yml/badge.svg)](https://github.com/feng/pangu/actions/workflows/ci.yml)
+[![CI](https://github.com/phoenix7956/pangu/actions/workflows/ci.yml/badge.svg)](https://github.com/phoenix7956/pangu/actions/workflows/ci.yml)
 
 ---
 
@@ -53,7 +53,7 @@ Pangu 是一个**通用 AI Agent 内核**：会自己拆任务、派活、验收
 ## 3. 安装
 
 ```bash
-git clone https://github.com/feng/pangu.git
+git clone https://github.com/phoenix7956/pangu.git
 cd pangu
 pnpm install --frozen-lockfile                              # 仓库是 pnpm workspace, 锁文件在根
 cp apps/core/config/nodes/example-node.json apps/core/config/nodes/node.json   # 填你的 endpoint / api_key
@@ -296,7 +296,7 @@ apps/core/
 
 - [贡献指南](CONTRIBUTING.md)
 - [安全策略](SECURITY.md)
-- [问题反馈](https://github.com/feng/pangu/issues)
+- [问题反馈](https://github.com/phoenix7956/pangu/issues)
 
 ## 12. 怎么发布一版
 
