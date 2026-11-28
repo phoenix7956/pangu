@@ -114,7 +114,7 @@ const MAIN_GENERAL_TOOLS_FOR_LLM = [
   // 策略分析 (analyzer 类, 主对话也要见 — P1 64卦降级后默认走 LLM 自身推理, 5 个 64卦工具 description 已标 [辅助参考])
   'gua_cast', 'hexagram_lookup', 'risk_assessment', 'critical_point_analysis', 'situation_check', 'momentum_assessment',
   // 六格判局 (2026-10-22 老板「这用在项目上」): 生彼泻克耗用在**非八字**的事情上 ——
-  // 项目推进/决策取舍/该不该停。这是内核唯一能对「一件事」出判断的入口, 原来只有 bazi_calc 能碰着六格。
+  // 项目推进/决策取舍/该不该停。这是内核唯一能对「一件事」出判断的入口, 六格判局工具。
   'wuxing_judge',
   // 风水排盘 (2026-10-23 第 69 批): 八宅/风水 —— 命卦/宅卦/大游年/阳宅四要/三元九运。
   //   ⚠️ 只进 main, **不进 li**: li 那份 schema 已经 8987/9000, 只剩 13 字符,
@@ -136,7 +136,6 @@ const MAIN_GENERAL_TOOLS_FOR_LLM = [
   'exec_command',         // shell, sandbox 二次拦截 (白名单 + 危险命令检查)
   'self_iterate',         // 2026-08-02 老板拍: 自我迭代闭环 (改码→验证→快照→重启→回滚)
   'draw_layout',          // 2026-08-02 老板拍: 平面图出图 (SVG/DXF 确定性必出, 文件 statSync 验证)
-  'bazi_calc',            // 确定性万年历排盘；此前只注册未暴露给 main，主对话无法调用
   'media_generate',       // 多模态生成内置化 (image/music; video 已停用)
   'skill_use',            // 2026-08-07 老板拍: skill 读取内置化 (顶 4 个 echo MCP 桥)
   // 2026-10-30 (第 172 批): 盘古自己接微信了 ——

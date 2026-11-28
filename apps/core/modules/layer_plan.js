@@ -40,7 +40,8 @@ const {
   isDecisionQuestion,
 } = require('./gua_gate_kws.js');
 
-const { detectBaziIntent } = require('./bazi_intent.js');
+// bazi_intent 已随功能页拆离, 此处用空实现保持接口兼容
+const detectBaziIntent = () => ({ matched: false, signals: [] });
 
 // ============================================================
 // 主人明说「要六格判局」的信号 (窄口径: 只认点名, 不猜)

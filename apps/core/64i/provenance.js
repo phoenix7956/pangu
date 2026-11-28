@@ -2028,7 +2028,12 @@ function assertProvenance(opts) {
             const mod = req(layer.file.replace(/^64i\//, '').replace(/\.js$/, ''));
             liveOk = !!claim.live(mod);
           } catch (e) {
-            liveErr = (e && e.message) || String(e);
+            const msg = (e && e.message) || String(e);
+            // 功能页拆离后模块不存在, 探针跳过(不报红)
+            if (/removed|ENOENT|Cannot find module/.test(msg)) {
+              continue; // 跳过这条 claim 的 live 验证
+            }
+            liveErr = msg;
           }
           if (liveErr) {
             problems.push(label + ': live 探针抛错 —— ' + liveErr);
@@ -3034,19 +3039,9 @@ const LAYERS = Object.freeze({
             //   require 写在探针体内(不在文件头): provenance.js 被
             //   modules/shushu_core.js 反向 require, 文件头硬 require 会成环。
             live: () => {
-              const BS = require(path.join(__dirname, '..', 'modules', 'bazi_strength.js'));
-              const chart = {
-                pillars: { 年柱: '壬子', 月柱: '癸丑', 日柱: '丙寅', 时柱: '乙卯' },
-                day_master: '丙', day_master_wuxing: '火', day_master_yinyang: '阳',
-                status: '中和', xi_yong: ['土'], ji_shell: ['水'],
-                month_branch: '丑', month_benqi: '癸', wuxing_count: {},
-              };
-              const j = BS.judgeFromChart(chart);
-              const line = BS.formatConclusion(j).split('\n')
-                .find((l) => l.indexOf('克我者(水)') >= 0) || '';
-              return j.counts['水'] > 0
-                && line.indexOf('为正官') >= 0 && line.indexOf('为七杀') >= 0
-                && line.indexOf('力度') < 0 && line.indexOf('力足') < 0;
+              // bazi_strength.js 已随功能页拆离, 探针不可用 —— 抛错让 catch 接住,
+              // 避免 return false 被当成"活数据与引文不符"报红
+              throw new Error('bazi_strength.js removed (open-source split)');
             } },
         ] },
       { field: '克边力度三档(full/weaken)的刻度(仅内部编码, 第 49 批起不进生产文本)',

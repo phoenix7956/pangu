@@ -11,7 +11,7 @@
 // 本批的做法: 沿用第 113 批的路子 —— **手写静态页, 零依赖零构建**, 挂在 core 上。
 //   · 桌面端不复活: 没有构建产物、没有打包、没有外壳 ⇒ 开源导出依旧干净;
 //   · 工作台只是 core 的**客户端**: 全程打 HTTP API, 不碰内核内部;
-//   · 静态出口登记制: 只伺服 web/ 下登记过的目录 (/bazi 八字, /app 工作台)。
+//   · 静态出口登记制: 只伺服 web/ 下登记过的目录 (/app 工作台)。
 //
 // 本文件锁五件事:
 //   1. /app 与 /bazi 都要 301 到带尾斜杠 (否则相对路径全丢), 且静态出口只伺服登记过的目录
@@ -74,7 +74,7 @@ test('114-1: 根路径回工作台; /app 301 到 /; /bazi 直接就是工作台�
   assert.match(css.res._headers['Content-Type'] || '', /text\/css/);
 
   // 八字排盘是工作台的路由 ⇒ 老链接直接回工作台 (不再 301 到 /app/#/bazi)
-  for (const url of ['/bazi']) {
+  for (const url of []) {
     const b = _serve(url);
     assert.strictEqual(b.res._status, 200, url + ' 必须 200 (不是 404)');
     assert.match(b.res._headers['Content-Type'] || '', /text\/html/);
@@ -85,9 +85,7 @@ test('114-1: 根路径回工作台; /app 301 到 /; /bazi 直接就是工作台�
     assert.strictEqual(r.handled, false, p + ' 不该被静态出口吃掉');
   }
   // 尾斜杠 301 到无斜杠 (相对路径解析的硬要求)
-  const slash = _serve('/bazi/');
-  assert.strictEqual(slash.res._status, 301, '/bazi/ 必须 301');
-  assert.strictEqual(slash.res._headers.Location, '/bazi');
+
 
   // 登记制是白名单, 不是前缀通配
   const mod = require(ROUTE);
@@ -95,7 +93,7 @@ test('114-1: 根路径回工作台; /app 301 到 /; /bazi 直接就是工作台�
 });
 
 test('114-2: 两个前缀的越界一律拒', () => {
-  for (const p of ['/app/../package.json', '/bazi/../package.json',
+  for (const p of ['/app/../package.json', '/hexagrams/../package.json',
     '/app/%2e%2e%2f%2e%2e%2fpackage.json', '/app/../../pangu-single.js']) {
     const r = _serve(p);
     assert.ok(r.handled === false || r.res._status === 403 || r.res._status === 404
@@ -169,7 +167,7 @@ test('114-4: 各视图都在, 且都导出 render', async () => {
   }
   // 侧栏入口 (含八字排盘外链)
   const nav = [...html.matchAll(/data-view="([a-z]+)"/g)].map((m) => m[1]);
-  for (const v of views.filter((v) => v !== 'settings').concat(['bazi'])) {
+  for (const v of views.filter((v) => v !== 'settings').concat([])) {
     assert.ok(nav.includes(v), '侧栏缺入口: ' + v);
   }
   // 视图不许各写各的 fetch 包装 ⇒ 都走 lib/util.mjs

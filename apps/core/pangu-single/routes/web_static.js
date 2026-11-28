@@ -73,7 +73,7 @@ const PAGES = {
 //   白名单 —— 少登记一个, 那一页就 404; 多登记一个, 未知路径就变成 200。
 //   这份清单必须跟前端 app.mjs 的 VIEWS 一致 (守卫逐条比对, 见 tests/)。
 const SPA_VIEWS = new Set([
-  'team', 'bazi', 'hexagrams', 'history', 
+  'team', 'hexagrams', 'history', 
   'marketplace', 'subagents', 'status', 'settings',
   
   // 第 176 批: 进化页 (自进化账本的逐日趋势) —— 漏登 /evolution 就 404

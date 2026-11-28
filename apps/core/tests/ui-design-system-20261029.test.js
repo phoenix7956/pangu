@@ -460,22 +460,7 @@ test('150-1 负例自检: 漏掉某页必须报红', () => {
     '负例: 漏掉的页面必须被挑出来');
 });
 
-// ── ⑫ 第 150 批: 八字页的勾选项不许是裸系统复选框 ───────────────────
-//   裸 <input type=checkbox> 跟全站 .pg-switch 不是一个时代。
-//   判据: bazi.mjs 里不许再出现 type="checkbox";
-//   两个开关的 id 必须还在 (表单读值走的是它们), 且挂 .pg-switch。
-test('150-2: 八字页两个勾选项走 .pg-switch, 不许裸 checkbox', () => {
-  const src = readJs('views/bazi.mjs');
-  assert.ok(!/type=["']checkbox["']/.test(src), '裸系统复选框复活了');
-  assert.ok(/id="bz-f-solar-time"[^>]*pg-switch|pg-switch[^>]*id="bz-f-solar-time"/.test(src)
-    || (src.includes('id="bz-f-solar-time"') && /class="bz-chk pg-switch/.test(src)),
-    '真太阳时开关丢了或没挂 .pg-switch');
-  assert.ok(src.includes('id="bz-f-leap-month"') && /class="bz-chk pg-switch/.test(src),
-    '闰月开关丢了或没挂 .pg-switch');
-  // 读值必须从开关读 (classList), 不是从 .checked 读 —— 按钮没有 checked。
-  assert.ok(/bz-f-solar-time'\)\.classList\.contains\('on'\)/.test(src),
-    '真太阳时还在读 .checked ⇒ 开关是死的');
-});
+// (150-2 八字页 UI 守卫已随功能页拆离, 不再跑)
 
 // ── ⑬ 第 151 批: 首屏是 agent 的样子, 不是产品落地页 ─────────────
 //

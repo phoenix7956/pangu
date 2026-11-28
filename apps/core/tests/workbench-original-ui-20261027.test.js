@@ -36,7 +36,7 @@ const APP = path.join(CORE, 'web', 'app');
 const REPO = path.join(CORE, '..', '..');
 // 2026-11-26: 开源导出树把 7 轨 (梅花/奇门/八宅/合婚/紫微/小六壬/面相) 视图全剥,
 //   这些「视图齐全」的 UI 守卫是**私有树不变量**。开源模式下剔除 7 轨视图名,
-//   公版视图 (chat/team/hexagrams/history/marketplace/status/settings/bazi) 照验。
+//   公版视图 (chat/team/hexagrams/history/marketplace/status/settings) 照验。
 const IS_OPEN_SOURCE = fs.existsSync(path.join(CORE, '64i', '.pangu-open-source'));
 const TRACK_VIEWS = new Set(['meihua', 'qimen', 'bazhai', 'liuren', 'hehun', 'ziwei', 'mianxiang']);
 
@@ -123,7 +123,7 @@ test('116-2: 侧栏分组和路径跟原版一致', () => {
   //    ⇒ 收成 工作 / 推演 两组 + 底部「系统」区)。
   //   这条守卫还停在第 116 批的旧分组名 ⇒ 从第 159 批起一直红着
   //   (同样被 && 短路掩盖着)。⇒ 改成盯**现行**分组与入口。
-  for (const g of ['工作', '易学推演', '系统']) {
+  for (const g of ['工作', '系统']) {
     assert.ok(html.includes('>' + g + '<'), '侧栏必须有分组「' + g + '」');
   }
   assert.ok(html.includes('本地节点'), '侧栏底部必须有「本地节点」');
@@ -134,8 +134,7 @@ test('116-2: 侧栏分组和路径跟原版一致', () => {
     ['工作台', './'],
     ['自动化', 'team'],
     ['梅花起卦', 'meihua'],    // 开源树无 meihua 视图, 下面 ITEMS 过滤剔除
-    // 第 119 批: 八字排盘搬进工作台 ⇒ 侧栏指向 /bazi (不再是独立静态页)
-    ['八字排盘', 'bazi'],
+    // (八字排盘已拆离)
     ['六十四卦', 'hexagrams'],
     ['历史档案', 'history'],
     ['工具集', 'marketplace'],
@@ -180,7 +179,7 @@ test('116-4: ⌘K / Ctrl+K 能调出令符, 方向键 + Enter + Esc 都在', () 
     appSrc.indexOf('const COMMANDS'),
     appSrc.indexOf('];', appSrc.indexOf('const COMMANDS'))
   );
-  const NAMES = ['工作台', '自动化', '梅花起卦', '八字排盘', '六十四卦',
+  const NAMES = ['工作台', '自动化', '六十四卦',
     '历史档案', '工具集', '将灵', '状态', '系统设置'];
   // 开源树剥了 meihua 视图 ⇒ 令符清单里没有「梅花起卦」, 该项只验私有树
   const _NAMES = NAMES.filter((n) => !(IS_OPEN_SOURCE && TRACK_VIEWS.has(n === '梅花起卦' ? 'meihua' : n)));

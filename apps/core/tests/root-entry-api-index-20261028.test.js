@@ -14,8 +14,8 @@
  * ── 第 140 批再问一次: 「**为什么非要带上 app? 或者 #?**」 ──────
  *   第 139 批的落点是 `/` → 302 → `/app/` —— 老板的意思不是「跳过去」, 是
  *   「**地址里不许有 /app, 也不许有 #**」。产品级的地址应该是
- *   `http://127.0.0.1:18901/bazi`。
- *   ⇒ `/` **直接**回工作台 (200, 不绕); 视图路径 (`/bazi` `/settings/permission`)
+ *   `http://127.0.0.1:18901/hexagrams`。
+ *   ⇒ `/` **直接**回工作台 (200, 不绕); 视图路径 (`/hexagrams` `/settings/permission`)
  *     回工作台 (白名单); 老前缀 `/app` 301 到 `/`; 静态资源仍从 `/app/` 出。
  *
  * ── 本文件锁七件事 (机器判据, 不是注释) ──────────────────────
@@ -74,7 +74,7 @@ test('140-1b: 老前缀 /app 301 到 / (浏览器保留 fragment ⇒ 老书签�
 });
 
 test('140-1c: 工作台的视图路径回工作台 (白名单, 不是通配)', () => {
-  for (const url of ['/bazi', '/hexagrams', '/settings']) {
+  for (const url of ['/hexagrams', '/settings']) {
     const { handled, res } = _serve(url);
     assert.strictEqual(handled, true, url + ' 必须被处理');
     assert.strictEqual(res._status, 200, url + ' 必须 200 (不是 404)');
@@ -133,7 +133,7 @@ test('139-3: 索引页里列的端点必须是真的路由 (不许拿假端点�
     (routerSrc.match(/['"](\/[a-z0-9\/_-]+)['"]/g) || [])
       .map(s => '/' + s.replace(/['"]/g, '').slice(1)),
   );
-  // 第 140 批: 工作台的视图路径 (/bazi 等) 也是真路由 —— 服务端的白名单
+  // 第 140 批: 工作台的视图路径 (/hexagrams 等) 也是真路由 —— 服务端的白名单
   const mod = require(path.join(CORE, 'pangu-single', 'routes', 'web_static'));
   for (const v of mod.SPA_VIEWS) known.add('/' + v);
   const unknown = paths.filter(p => !known.has(p));

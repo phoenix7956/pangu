@@ -73,12 +73,7 @@ test('117-1: 原版 7 个主视图都在工作台里有对应实现', () => {
     assert.match(src, /export\s+default\s+render/, target + ' 必须 default 导出 render');
   }
 
-  // 八字排盘 (原版 BaziView.jsx): 第 119 批起搬进工作台, 路由 #/bazi
-  // (老板: 「/bazi/ 这个链接还不对, 其他的都是 /app/#/」)
-  assert.ok(exists('views/bazi.mjs'), '八字排盘必须在工作台里有实现 (views/bazi.mjs)');
-  const bazi = read('views/bazi.mjs');
-  assert.match(bazi, /export\s+(async\s+)?function\s+render/, 'views/bazi.mjs 必须导出 render');
-  assert.match(bazi, /export\s+default\s+render/, 'views/bazi.mjs 必须 default 导出 render');
+  // (八字排盘功能页已拆离)
 });
 
 // ── 117-2 主视图不许是「粗版」: 原版关键结构必须在位 ─────────────

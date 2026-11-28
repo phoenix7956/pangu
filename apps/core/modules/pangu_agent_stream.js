@@ -97,52 +97,14 @@ async function _handlePanguAgentStream(req, res) {
         ? _deps._shouldCastGua
         : _deps._shouldUseDispatcher;
       //
-      // 2026-10-21 (老板拍「那就改」, decision.md §P1-4): 生辰八字**不起卦**。
-      //
-      // 为什么: 八字本身就是盘。用户给了生辰, 再叠一个梅花卦 = 两套盘打架,
-      // LLM 不知道以哪个为准。更实际的后果是 ——【盘古起卦】块占住了推理入口,
-      // 模型顺着卦象走, 不去调 bazi_calc; 而 bazi_calc 明明在
-      // tools_schema.js:98 的 MAIN_GENERAL_TOOLS_FOR_LLM 里, 主对话够得着。
-      // (注: 2026-10-21 之前我误判「bazi_calc 主对话调不到」, 那是把
-      //  tools_schema.js:139 注释里的「**此前**只注册未暴露」当成了现状。
-      //  核实: bazi_calc + gua_cast 都在 MAIN 集 23 个工具里。问题不在够不够得着,
-      //  在模型顺着卦走不去调它。)
-      //
-      // 判据在 modules/bazi_intent.js, 只做**减法**: 识别不出就照常起卦, 原行为不变。
-      // 反例已锁进 tests/bazi-intent-skip-gua-20261021.test.js ——
-      // 「查 2015年3月15日的会议记录」这种带日期但非生辰的, 仍然照常起卦。
-      //
-      // 2026-10-23 第 58 批: 跳过与否改由 bazi_intent.evaluateGuaSkip 说了算 ——
-      // 它比「matched 就跳」多两档, 修掉了老板报的真 bug:
-      // 「1990年3月15日生, 男, **算一卦**看今年财运」原本被判生辰 → 跳过起卦 →
-      // 主人明说要卦却没卦(规则 19(a) 写的正是「必调」)。
-      // 现在: 明说排八字 → 跳过; 明说要卦 → **不跳过**(生辰是落地材料, 走 combo);
-      // 只有生辰没说卦 → 跳过。
       let _skipGuaReason = '';
       let _skipGua = false;
-      try {
-        const _bz = require('./bazi_intent');
-        const _r = _bz.evaluateGuaSkip(rawInput || userInput);
-        if (_r && _r.skip) {
-          _skipGua = true;
-          _skipGuaReason = _r.reason + ' [' + (_r.signals || []).join(',') + ']';
-        } else if (_r && _r.reason && _r.reason.indexOf('明说要卦') >= 0) {
-          _skipGuaReason = _r.reason + ' [' + (_r.signals || []).join(',') + ']';
-        }
-      } catch (e) {
-        // 识别器坏了不能连带起卦也坏 —— 兜底成"照常起卦"
-        console.warn('[gua-first] bazi_intent failed:', e.message);
-      }
+      // 意图识别已随功能页拆离, 当前默认不跳过起卦
       if (_skipGua) {
         console.log('[gua-first] 跳过起卦 —', _skipGuaReason);
       }
       //
-      // 2026-10-23 第 58 批: 分层编排 —— 判出「这题走哪层」。
-      //   为什么: 规则 #19 只讲了 64 卦, bazi_calc / 六格判局 / 串起来
-      //   模型**一个都没被告知过**(工具描述里 gua_cast 9 字符、bazi_calc 16 字符,
-      //   li 角色 schema 已 8987/9000 再塞就超预算)。模型不知道有 bazi_calc 这条路,
-      //   于是它只会起卦、只会用卦 —— 「什么时候串起来用」就永远轮不到。
-      //   探测器**只解释, 不改行为**: 真正起不起卦仍然是 _shouldCastGua + bazi_intent 说了算。
+      // 分层编排 —— 判出「这题走哪层」(六格判局工具 wuxing_judge 仍可用)
       let _planLine = '';
       try {
         const _lp = require('./layer_plan');
@@ -203,25 +165,7 @@ async function _handlePanguAgentStream(req, res) {
         userInput += '\n\n【自查纪律 · 系统强制】这是关于你自己的问题。铁律: 回答里每一条关于你架构/工具/权限/沙箱/状态的断言, 必须来自本轮真实 tool_result (exec_command 跑 grep/ps/curl / read_file 读源码配置)。最终答案至少给出两处可核验来源，格式必须为“文件路径:行号”或“命令: 原文摘要”。禁止凭记忆/印象/训练知识描述你自己 — 你对自己的印象全是错的, 只有正在跑的代码是真的。没查到的项直接写 "未验证", 不许编。';
       }
       const images = req_body.images || [];
-      // 2026-10-12 (会话 desktop-1791787104119 实案, 老板报"感觉有点问题"): 四柱已知时,
-      // 十神/五行/地支关系改由本地确定性查表注入 (bazi_chart_facts) —— LLM 凭记忆算十神
-      // 会错 ("土印/庚金七杀/印旺" 三连错, 原局木=0 不可能印旺)。查表题不走推理。
-      // 注入进 userInput, 主 loop / dispatcher 子 agent / 综合 LLM 全都拿得到。
-      // _chartFacts 提到块外 —— 路由也要用它当「会话里已经有盘」的判据
-      // (见下面 detectSingleShotChartTask 第 ③ 档: 追问轮不许掉进 dispatcher)。
-      let _chartFacts = '';
-      try {
-        _chartFacts = require('./bazi_chart_facts').buildFactsFromConversation(rawInput, messages);
-        if (_chartFacts) userInput += '\n\n' + _chartFacts;
-      } catch (_) { /* 事实块生成失败不阻断主流程 */ }
-
-      // 2026-10-12 (e2e-812-gate-002 实测实案): 首轮纯图做题, 模型无视图里「年柱/月柱/日柱/时柱」
-      // 标签, 按从左到右=年月日时硬猜柱序 → 四柱整个颠倒 (庚子·丁丑·己未·戊午), 日主错成己土
-      // (图上白纸黑字写着 日主:丁火)。核验门只能验"答案内部自洽", 读错盘它救不了 ——
-      // 读图纪律必须在进门时前置注入, 这是首轮纯图的唯一防线。
-      if (images.length > 0 && /(命盘|八字|四柱|排盘|做题|命造|原局|大运|流年)/.test(userInput)) {
-        userInput += '\n\n【读图纪律 · 系统强制】这是排盘图。柱序以图里标注的「年柱/月柱/日柱/时柱」标签为准 —— 很多盘从左到右是「时日月年」, 禁止按位置猜柱序。先把四柱按「年月日时」顺序逐字抄下, 核对日主天干, 再开始分析。柱序错 = 全盘错。';
-      }
+      // (八字排盘相关功能页已拆离, 排盘事实/读图纪律块不再注入)
 
       // 2026-10-23 第 58 批: 把「这题走哪层」那一行送给模型。
       //
@@ -237,76 +181,11 @@ async function _handlePanguAgentStream(req, res) {
       //      按 userInput 判路由, 而 DISPATCHER_KWS 里 '卦' 是**保留的单字词条** ——
       //      一行里带「卦」就把「第24卦是哪一卦」这种查表题从 legacy 拽进 dispatcher
       //      (2026-10-21 修过一次, 这里不许回归)。
-      // 2026-10-28 (现场实跑取证, 会话 web-1793124838326):
-      //   路由判据必须是**主人自己的原话**, 不能是"我们往里塞的东西"。
-      //
-      //   实跑: 第 2 轮被判进 dispatcher, 唯一命中词是 '记忆' —— 来自**服务端自己注入**的
-      //   【排盘事实】纪律块 (bazi_chart_facts.js: "禁止凭记忆另算十神"),
-      //   而 '记忆' 就在 DISPATCHER_KWS 里 (pangu-single.js:1505)。
-      //   第 1 轮为什么没事: 那时四柱还没算出来, 事实块根本不存在 ⇒ 没有 '记忆'。
-      //   **"第一次以后"的分水岭就是它** —— 第 2 轮起每轮都带事实块, 于是每轮都进编排,
-      //   每轮都派将灵去查外网 (百度百科 403 / 维基超时 30s×N), 5 分钟起。
-      //
-      //   卦块早就有同样的坑, 已经用 _stripGuaBlockForRouting 剥掉了 (见 pangu-single.js
-      //   的注释: "任何按文本内容做路由的闸门, 都必须先把服务端自己注入的装饰剥掉")。
-      //   事实块 / 自查纪律 / 读图纪律 这一类注入块**没剥** —— 现在统一按**原话**判。
-      //   _rawUserText 是第 79 行抓的快照 (任何注入之前), 天然不含注入块。
       const _userInputForRouting = _rawUserText || userInput;
 
-      // 2026-10-28 第 129 批: 批命「做题」纪律 —— 八条题逐条答, 「出生地周围情况」
-      // = 出生地地理环境(调候), 不是出生年代的经济社会统计。
-      //
-      // 现场 (2026-10-27 23:40, 会话 15567183): 老板发课件《排盘样例》图 +「做题，看清楚题目」。
-      //   盘古把「分析出生地周围情况」读成了「1975 年四川/成都的社会经济统计」——
-      //   发了一条 web_search, 又派了个子 agent 去查 1975 年职工平均工资/城镇化率/人口总数,
-      //   子 agent 连着 6 次 web_fetch 超时(每次 30s), 整轮 4m49s 还在跑。
-      //   根因: 全仓没有一条规则说「出生地周围情况」= 什么 ⇒ 模型只能猜, 猜错了没人拦。
-      //
-      // ⚠️ 位置铁律: 必须挂在**路由快照之后**。挂前面 = 这段字参与
-      //   _shouldUseDispatcher 判定, 而 DISPATCHER_KWS 里有 '分析'/'天气'/'检查'/'验证' 等词
-      //   —— 一挂就把纯文字的命理题拽进 90 秒起步的 dispatcher 编排 (慢的制造机)。
-      //   口径真源见 modules/bazi_items.js (唯一真源, 别在这里另抄一份)。
+      // 批命做题/单镜排盘任务识别已随功能页拆离
       let _itemTask = false;
-      // 2026-10-28 第 132 批: 「单镜排盘任务」—— 主 agent 一口气答完, 不许进 dispatcher。
-      //   判据真源在 modules/bazi_items.js 的 detectSingleShotChartTask (三档:
-      //   批命做题题 / 生辰排盘题 / 已有命盘 + 命理追问)。
-      //   为什么单独一档而不并进 _itemTask: _itemTask 只管「批命做题」这一种,
-      //   而现场慢的**不止**做题题 —— 「排八字」「这个人的大运怎么样」同样落进 dispatcher,
-      //   同样 5 分钟起。口径在 bazi_items 里一份, 这里只调。
       let _singleShotChart = false;
-      try {
-        const _bi = require('./bazi_items');
-        // 2026-10-28: 追问轮没重传图时, 靠**上一轮**的做题题状态把这一轮也认成做题题
-        //   (否则纪律不注入 + 路由掉进 dispatcher = 5 分钟起步)。
-        //   粘住与解除的判据见 modules/bazi_items.js detectItemTask 里的注释。
-        const _prevItem = _bi.getTurnContext(req_body.session_id);
-        const _det = _bi.detectItemTask(_rawUserText, {
-          hasImages: Array.isArray(req_body.images) && req_body.images.length > 0,
-          sessionItemTask: Boolean(_prevItem && _prevItem.itemTask),
-          // 2026-10-28 (现场 web-1793124838326): 会话里已经有盘了, 主人这轮只说「做题」,
-          //   没重传图 ⇒ 只看 hasImages/sessionItemTask 判不中 ⇒ 纪律没注入 + 掉进 dispatcher。
-          hasChart: Boolean(_chartFacts),
-        });
-        _itemTask = Boolean(_det && _det.matched);
-        try {
-          const _ss = _bi.detectSingleShotChartTask(_rawUserText, {
-            hasImages: Array.isArray(req_body.images) && req_body.images.length > 0,
-            sessionItemTask: Boolean(_prevItem && _prevItem.itemTask),
-            hasChart: Boolean(_chartFacts),
-          });
-          _singleShotChart = Boolean(_ss && _ss.matched);
-          if (_singleShotChart && !_itemTask) {
-            console.log('[bazi-chart] 命中单镜排盘任务 (' + _ss.reason + ') —— 留在主 agent');
-          }
-        } catch (_) { /* 单镜判据失败不阻断主流程 */ }
-        if (_itemTask) {
-          userInput = userInput + '\n\n' + _bi.renderItemDiscipline();
-          console.log('[bazi-items] 命中批命做题题 (' + _det.reason + ') —— 注入八条逐条作答纪律');
-        }
-        // 工具层的门靠它认出「本轮是批命做题题」(光看调用参数判不出来:
-        // 那条 web_search 的参数里一个命理词都没有)。
-        _bi.setTurnContext(req_body.session_id, { itemTask: _itemTask, turnText: String(userInput || '') });
-      } catch (_) { /* 纪律块生成失败不阻断主流程 */ }
 
       if (_planLine) {
         userInput = userInput + '\n\n' + _planLine;
@@ -380,20 +259,7 @@ async function _handlePanguAgentStream(req, res) {
       //   理由见上面 ③ —— 这一行里带「卦」, 而 DISPATCHER_KWS 保留单字 '卦',
       //   拿挂了行的文本判会把查表题拽进 dispatcher(2026-10-21 修过的东西不许回归)。
       //
-      // 2026-10-28 (现场 web-1793124838326 第 2 轮): 批命做题题**也不许**走 dispatcher。
-      //   理由跟上面「带图禁止走 dispatcher」是同一条铁律 —— 单镜任务由主 agent 一口气答完:
-      //     ① 这道题主 agent 自己就能干 (bazi_calc 在 main 集里, 一次调用出全盘);
-      //     ② dispatcher 路径下 main 的工具笼被砍到 2 个 (dispatch_subagents + task_done),
-      //        main 够不到 bazi_calc ⇒ 只能派将灵 ⇒ 将灵去查外网 (403/30s 超时) ⇒ 5 分钟起;
-      //     ③ 批命做题纪律 ④ 明写「不许为它发 web_search / web_fetch, 也不许派子 agent 去查」——
-      //        进了 dispatcher 这条纪律就形同虚设。
-      //   实测: 修完这一行, 同一道题的追问轮从 5m02s 回到跟第 1 轮一个量级。
-      //
-      // 2026-10-28 第 132 批补: 「单镜排盘任务」同样不许走 dispatcher。
-      //   实测: 「男，1979年5月6日6时56分，四川成都，排八字」(没带图) 会被判进
-      //   dispatcher ⇒ main 的工具笼被砍到 2 个 ⇒ 够不到 bazi_calc ⇒ 排盘只能
-      //   派给将灵 ⇒ 又是 5 分钟起。带图那一档早就禁了 (images.length === 0),
-      //   没图的那一档漏了。
+      // 单镜任务(带图/排盘)禁止走 dispatcher —— 主 agent 一口气答完, 工具笼不砍。
       if (process.env.PANGU_DEBUG_ROUTE === '1') {
         try {
           console.log('[route-probe] itemTask=' + _itemTask

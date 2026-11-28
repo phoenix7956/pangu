@@ -15,7 +15,7 @@
  * ── 为什么路由必须**单段** (硬约束, 不是风格) ─────────────────
  *   浏览器把相对路径按「最后一段」解析: 页面在 `/settings/agent` 时,
  *   相对 `themes.css` 会解析成 `/settings/themes.css` ⇒ 样式全丢。
- *   ⇒ 路由全部单段: `/bazi` `/settings?tab=agent` (子页改查询参数)。
+ *   ⇒ 路由全部单段: `/hexagrams` `/settings?tab=agent` (子页改查询参数)。
  *
  * ── 本文件锁七件事 (机器判据, 不是注释) ──────────────────────
  *   1. 客户端 JS 里不许出现绝对站内路径字面量 ('/api/x' '/health' …)
@@ -212,7 +212,7 @@ test('141-4: 路由必须单段 (多段会让相对资源解析到子目录)', (
 
 // ── 5. 服务端: 资源挂在基址根, 真 API 路由不被吃掉 ────────────
 test('141-5: 静态资源挂在基址根, 且真 API 路由不许被吃掉', () => {
-  for (const u of ['/themes.css', '/styles.css', '/app.mjs', '/lib/util.mjs', '/views/bazi.css']) {
+  for (const u of ['/themes.css', '/styles.css', '/app.mjs', '/lib/util.mjs', '/views/hexagrams.css']) {
     const { handled, res } = _serve(u);
     assert.strictEqual(handled, true, u + ' 必须被静态出口处理 (资源要挂在基址根)');
     assert.strictEqual(res._status, 200, u + ' 必须 200, 实际 ' + res._status);
@@ -224,7 +224,7 @@ test('141-5: 静态资源挂在基址根, 且真 API 路由不许被吃掉', () 
 });
 
 test('141-6: 尾斜杠一律 301 到无斜杠 (相对解析的硬要求)', () => {
-  const cases = { '/bazi/': '/bazi', '/settings/': '/settings', '/api/': '/api' };
+  const cases = { '/hexagrams/': '/hexagrams', '/settings/': '/settings', '/api/': '/api' };
   for (const [from, to] of Object.entries(cases)) {
     const { handled, res } = _serve(from);
     assert.strictEqual(handled, true, from + ' 必须被处理');
@@ -267,10 +267,10 @@ test('141-8: X-Forwarded-Prefix 生效 (盘古挂到 /pangu/ 下也能跑)', () 
     setHeader(k, v) { this._headers[k] = v; },
     end(b) { if (b) this._body = String(b); },
   };
-  const req = mk('/pangu/bazi');
-  assert.strictEqual(req.url, '/bazi', '前缀没被摘掉: ' + req.url);
+  const req = mk('/pangu/hexagrams');
+  assert.strictEqual(req.url, '/hexagrams', '前缀没被摘掉: ' + req.url);
   const handled = mod.handler(req, res);
-  assert.strictEqual(handled, true, '/pangu/bazi 必须被处理');
+  assert.strictEqual(handled, true, '/pangu/hexagrams 必须被处理');
   assert.strictEqual(res._status, 200);
   assert.ok(res._body.includes('pangu-app'), '前缀下要回工作台本体');
 

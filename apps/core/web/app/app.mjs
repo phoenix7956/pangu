@@ -19,7 +19,6 @@ const main = $('#main');
 const VIEWS = {
   chat: () => import('./views/chat.mjs'),
   team: () => import('./views/team.mjs'),
-  bazi: () => import('./views/bazi.mjs'),
 
   hexagrams: () => import('./views/hexagrams.mjs'),
   history: () => import('./views/history.mjs'),
@@ -36,7 +35,6 @@ const TITLES = {
   //   现在每一句都改成「这一页能干什么」, 挂在顶栏标题后面 (见 #view-sub)。
   chat: ['工作台', '问一件事，盘古一步步推进'],
   team: ['自动化', '定时任务与后台作业'],
-  bazi: ['八字排盘', '四柱、五行喜忌与大运流年'],
   hexagrams: ['六十四卦', '六十四卦全文，可按五行筛选'],
   history: ['历史档案', '按日期归档的会话记录'],
   marketplace: ['工具集', '可安装的技能与工具'],
@@ -51,12 +49,11 @@ const TITLES = {
 //   现在只影响它们**页面内部**的排版, 不再影响外层。
 
 // 令符 (⌘K) 的可跳项 —— 原版 CommandPalette 的同一份清单
-//   第 141 批: go 一律**相对** ('bazi' / 'settings?tab=model') —— 写死前导斜杠
+//   第 141 批: go 一律**相对** ('hexagrams' / 'settings?tab=model') —— 写死前导斜杠
 //   就等于把基址写死了, 盘古挂到 /pangu/ 下时令符就跳飞了。
 const COMMANDS = [
   { name: '工作台', hint: '主对话', go: './' },
   { name: '自动化', hint: '起六爻 · 批果 · 复盘', go: 'team' },
-  { name: '八字排盘', hint: '四柱 · 大运流年', go: 'bazi' },
   { name: '六十四卦', hint: '六十四卦全文 · 按五行筛', go: 'hexagrams' },
   { name: '历史档案', hint: '按日期归档', go: 'history' },
   { name: '工具集', hint: '技能市场 · 内部工具', go: 'marketplace' },
@@ -318,7 +315,7 @@ for (const a of document.querySelectorAll('.pangu-nav-item')) {
   a.addEventListener('click', () => sidebar.classList.remove('is-open'));
 }
 
-// 路由真源在 lib/route.mjs: 新的是路径 (/bazi), 老的是哈希 (#/bazi, 仍认)。
+// 路由真源在 lib/route.mjs: 新的是路径 (/hexagrams), 老的是哈希 (#/hexagrams, 仍认)。
 window.addEventListener('hashchange', route);
 window.addEventListener('popstate', route);
 // 站内链接走前端路由 (不重载文档) —— 只有「不是工作台视图」的链接才让浏览器整页跳。

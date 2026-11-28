@@ -25,7 +25,7 @@ Pangu 是一个**通用 AI Agent 内核**：会自己拆任务、派活、验收
 > **本仓是内核 + HTTP API，并自带一套零构建的浏览器工作台。**
 > 打开 `http://127.0.0.1:18901/` 直接进**工作台**（根路径就是界面，没有多余前缀）；
 > 只想调 API：`GET /api` 返回一张 API 索引页，列明全部可直接调用的端点 + 接入示例。
-> 工作台的每一页就是一个**路径**：`/bazi` 八字排盘 · `/hexagrams` 六十四卦 ·
+> 工作台的每一页就是一个**路径**：`/hexagrams` 六十四卦 ·
 > `/settings` 系统设置 · `/history` 历史档案 · `/status` 状态。
 > 源码在 `apps/core/web/app/`（手写 HTML+CSS+ESM，**零构建、零 npm 依赖、零外部资源**）。
 > 本仓**不含**桌面客户端 —— 没有 Electron / Vite / Tauri 那一套壳。
@@ -75,8 +75,7 @@ Debian/Ubuntu 用 `apt-get install -y python3 make g++`。
 **前置依赖**：
 - Node.js 22+
 - 一个能用的推理端点（本地 LM Studio / Ollama / vLLM，或任意 OpenAI 兼容的云端 API）
-- Python 3 + `sxtwl`（八字排盘工具 `bazi_calc.py` 用，`pip3 install sxtwl`；
-  没装时八字相关工具降级，不影响其他工具）
+- Python 3（可选）
 
 节点配置解析顺序（见 `apps/core/config/node_config.js`）：
 
@@ -106,7 +105,6 @@ Debian/Ubuntu 用 `apt-get install -y python3 make g++`。
 |------|----------|
 | 对话 | 主 agent 流式对话（SSE），工具调用卡 / 来源标记 / 推理摘要都画出来 |
 | 六十四卦 | 64 卦全表，可按五行筛、可搜；点卦看卦辞 / 大象 / 逐爻爻辞 |
-| 八字排盘 | 四柱 / 五行 / 喜忌 / 神煞 / 大运 / 流年 / 流月 |
 | 历史 | 历史 session 列表与回放 |
 | 进化 | 自进化闭环的逐日账本：任务量 / 成功率 / 耗时 / 工具 / 模型，plotly 离线画图 |
 | 工具 · 状态 · 设置 | 工具清单、运行时状态、模型池 / 凭证 / MCP / 权限配置 |
@@ -122,7 +120,7 @@ Debian/Ubuntu 用 `apt-get install -y python3 make g++`。
 [`apps/core/web/app/vendor/README.md`](apps/core/web/app/vendor/README.md)。
 
 **挂到子路径下也能跑**：界面里的地址一律是**相对**的（`themes.css`、`api/version`、
-`bazi`……没有前导斜杠），所以盘古挂在 nginx 的 `/pangu/` 这种前缀后面一样能用。
+`hexagrams`……没有前导斜杠），所以盘古挂在 nginx 的 `/pangu/` 这种前缀后面一样能用。
 路由全部是**单段**（设置里的十二项走 `?tab=xxx`，不是 `/settings/xxx`）——
 这样相对地址永远解析到基址根。前缀由反代告诉服务端即可：
 

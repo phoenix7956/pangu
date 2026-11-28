@@ -100,12 +100,12 @@ test('B1 卦象门先跑, 结果喂给命盘门 (顺序不能反)', () => {
     verifyAndRepairChartAnswer: async (t, ask, evidence) => {
       seq.push('chart');
       assert.equal(t, fakeGua, '命盘门拿到的必须是卦象门重修后的文本');
-      assert.deepEqual(evidence, [{ name: 'bazi_calc', ok: true, result: {} }],
+      assert.deepEqual(evidence, [{ name: 'wuxing_judge', ok: true, result: {} }],
         '命盘门必须拿到调用方给的权威盘证据');
       return { text: fakeChart, checked: true, repaired: false, contradictions: [{ claim: '十神写错' }] };
     },
   };
-  const evidence = [{ name: 'bazi_calc', ok: true, result: {} }];
+  const evidence = [{ name: 'wuxing_judge', ok: true, result: {} }];
   return Promise.resolve(require(GATES).runAnswerGates('原始答复', async () => 'x',
     { chartEvidence: evidence }))
     .then((out) => {
