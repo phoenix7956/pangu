@@ -916,7 +916,7 @@
 /* ── 首页纯照搬样稿 2.0 viewHome (老板 11-04): 三段原样, 变量用正式版 themes.css ── */
 .home-hero { text-align: center; }
 .home-hero.v2 { position: relative; padding: 84px 0 40px; }
-.home-hero.v2 h1 { font-size: 38px; letter-spacing: 8px; }
+.home-hero.v2 h1 { font-size: var(--fs-display); letter-spacing: var(--ls-normal); }
 .home-hero.v2 p { font-size: var(--fs-title); margin-top: 14px; }
 .hero-hex { position: absolute; inset: 0; display: flex; justify-content: space-between; align-items: center; pointer-events: none; opacity: .16; }
 .hero-hex .hx { display: grid; gap: 7px; width: 120px; }

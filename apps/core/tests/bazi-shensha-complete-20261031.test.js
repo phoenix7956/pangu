@@ -17,6 +17,15 @@ test('老板盘逐柱神煞 16 条与上课 app 逐字一致', async () => {
   const { execFile } = require('node:child_process');
   const { promisify } = require('node:util');
   const pExec = promisify(execFile);
+  // bazi_calc.py 依赖 /usr/bin/python3 已装 sxtwl。没装就**跳过** (不是 fail),
+  //   免得把「环境缺依赖」当成「排盘逻辑错」报红 —— 有 sxtwl 的机器照验 16 条。
+  try {
+    await pExec('python3', ['-c', 'import sxtwl'], { stdio: 'pipe' });
+  } catch (_) {
+    test.skip?.();
+    console.log('skip: 本机 python3 未装 sxtwl (bazi_calc.py 的真万年历依赖), 16 条逐字判据在本机验不了');
+    return;
+  }
   const pyScript = path.join(ROOT, 'modules/tools/bazi/bazi_calc.py');
   const out = await pExec('python3', [pyScript, '1986', '12', '17', '16', '0', 'male',
     '--city', '上海', '--district', '宝山区', '--province', '上海'],

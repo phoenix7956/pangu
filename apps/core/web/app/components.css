@@ -224,13 +224,13 @@
 .pg-tg-ico {
   flex: none;
   width: 14px;
-  font-size: 10px;
+  font-size: var(--fs-meta);
   line-height: 1;
   color: var(--text-dim);
 }
 .pg-tg-ico::before { content: '▸'; }
 .pg-tg-bar[data-expanded='1'] .pg-tg-ico::before { content: '▾'; }
-.pg-tg-label { letter-spacing: .02em; }
+.pg-tg-label { letter-spacing: var(--ls-label); }
 .pg-tg-bar.is-running .pg-tg-ico { animation: pg-tg-pulse 1.6s ease-in-out infinite; }
 @keyframes pg-tg-pulse {
   0%, 100% { opacity: .5; }
